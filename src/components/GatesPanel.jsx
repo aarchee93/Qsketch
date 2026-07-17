@@ -1,50 +1,93 @@
 import SketchButton from './SketchButton';
 import { H0, H1, X0, X1, CNOT } from '../constants/quantumGates';
+import { GATE_INFO } from '../constants/gateInfo';
 
-// Gates Panel Component for Simulator
-const GatesPanel = ({ applyNewGate, handleMeasure, handleUndo, handleReset, measurementOutcome, history }) => (
-  <div className="flex flex-col space-y-4 p-4 border-2 border-black bg-white rounded-lg shadow-xl">
-    <h3 className="text-xl font-extrabold text-center border-b-2 border-dashed border-black pb-2">Quantum Gates</h3>
+const GatesPanel = ({
+  title = "Quantum Gates",
+  applyNewGate,
+  handleMeasure,
+  handleUndo,
+  handleReset,
+  disabled = false,
+  canUndo = false,
+  resetLabel = "Reset",
+  extraButton = null,
+}) => (
+  <div className="flex flex-col space-y-4 p-4 border-2 border-black bg-white rounded-lg shadow-xl" role="group" aria-label={title}>
+    <h3 className="text-xl font-extrabold text-center border-b-2 border-dashed border-black pb-2">{title}</h3>
     <div className="grid grid-cols-2 gap-4">
-      {/* Disable all gate application buttons if measurementOutcome is set */}
-      <SketchButton onClick={() => applyNewGate('H0', H0)} disabled={!!measurementOutcome}>
+      <SketchButton
+        title={GATE_INFO.H0}
+        aria-label="Apply Hadamard gate to Q0, creates superposition"
+        onClick={() => applyNewGate('H0', H0)}
+        disabled={disabled}
+      >
         Hadamard (Q0)
         <span className="block text-xs font-normal">Superposition</span>
       </SketchButton>
-      <SketchButton onClick={() => applyNewGate('H1', H1)} disabled={!!measurementOutcome} variant="inverted">
+      <SketchButton
+        title={GATE_INFO.H1}
+        aria-label="Apply Hadamard gate to Q1, creates superposition"
+        onClick={() => applyNewGate('H1', H1)}
+        disabled={disabled}
+      >
         Hadamard (Q1)
         <span className="block text-xs font-normal">Superposition</span>
       </SketchButton>
-      <SketchButton onClick={() => applyNewGate('X0', X0)} disabled={!!measurementOutcome}>
+      <SketchButton
+        title={GATE_INFO.X0}
+        aria-label="Apply Pauli-X gate to Q0, flips the qubit"
+        onClick={() => applyNewGate('X0', X0)}
+        disabled={disabled}
+      >
         Pauli-X (Q0)
         <span className="block text-xs font-normal">Flips Qubit</span>
       </SketchButton>
-      <SketchButton onClick={() => applyNewGate('X1', X1)} disabled={!!measurementOutcome} variant="inverted">
+      <SketchButton
+        title={GATE_INFO.X1}
+        aria-label="Apply Pauli-X gate to Q1, flips the qubit"
+        onClick={() => applyNewGate('X1', X1)}
+        disabled={disabled}
+        variant="inverted"
+      >
         Pauli-X (Q1)
         <span className="block text-xs font-normal">Flips Qubit</span>
       </SketchButton>
-      <SketchButton onClick={() => applyNewGate('CNOT', CNOT)} disabled={!!measurementOutcome}>
+      <SketchButton
+        title={GATE_INFO.CNOT}
+        aria-label="Apply CNOT gate, control Q0 target Q1, creates entanglement"
+        onClick={() => applyNewGate('CNOT', CNOT)}
+        disabled={disabled}
+      >
         CNOT (Q0 → Q1)
         <span className="block text-xs font-normal">Entanglement</span>
       </SketchButton>
     </div>
-    
-    {/* Measure Interaction Button */}
-    <SketchButton 
-        onClick={handleMeasure} 
-        disabled={!!measurementOutcome} 
+
+    {handleMeasure && (
+      <SketchButton
+        onClick={handleMeasure}
+        disabled={disabled}
         variant="inverted"
         className="font-extrabold text-lg"
-    >
-        Measure Qubits! 🤯
-    </SketchButton>
+        aria-label="Measure qubits, collapses the quantum state"
+      >
+        Measure Qubits! <span aria-hidden="true">🤯</span>
+      </SketchButton>
+    )}
 
-    <div className="flex justify-between pt-2 border-t-2 border-dashed border-black">
-      <SketchButton onClick={handleUndo} disabled={history.length === 1}>Undo</SketchButton>
-      <SketchButton onClick={handleReset} variant="inverted">Reset</SketchButton>
+    <div className="flex flex-wrap gap-2 justify-between pt-2 border-t-2 border-dashed border-black">
+      {handleUndo && (
+        <SketchButton onClick={handleUndo} disabled={!canUndo} aria-label="Undo last gate">
+          Undo
+        </SketchButton>
+      )}
+      <SketchButton onClick={handleReset} variant="inverted" aria-label={`${resetLabel}: clear the circuit`}>
+        {resetLabel}
+      </SketchButton>
+      {extraButton}
     </div>
   </div>
 );
 
 export default GatesPanel;
-

@@ -4,3 +4,408 @@
 
 /* Import the VT323 font */
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+/* ===== ANIMATIONS ===== */
+
+/* Confetti-style animation */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes confetti-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+/* Glow animations */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+  }
+}
+
+@keyframes glow-spin {
+  0% {
+    box-shadow: 0 0 10px 0 rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px 5px rgba(59, 130, 246, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 10px 0 rgba(59, 130, 246, 0.5);
+  }
+}
+
+/* Bar animations */
+@keyframes bar-grow {
+  0% {
+    height: 0%;
+  }
+  100% {
+    height: var(--target-height, 100%);
+  }
+}
+
+@keyframes bar-shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* Bounce animations */
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide animations */
+@keyframes slide-in-right {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out-right {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+/* Spin animation */
+@keyframes spin-fast {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Toast notification fade */
+@keyframes toast-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-fade-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+/* Badge pop */
+@keyframes badge-pop {
+  0% {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(10deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Fade in */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Utility classes */
+.animate-confetti {
+  animation: confetti-fall 1s ease-in forwards;
+}
+
+.animate-glow {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.animate-bar-grow {
+  animation: bar-grow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.animate-bounce-up {
+  animation: bounce-up 0.4s ease-out;
+}
+
+.animate-slide-in {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+.animate-spin-fast {
+  animation: spin-fast 1s linear infinite;
+}
+
+.animate-badge-pop {
+  animation: badge-pop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-in;
+}
+
+/* Hover effects */
+.hover-scale-110:hover {
+  transform: scale(1.1);
+  transition: transform 0.2s ease-out;
+}
+
+.hover-shadow:hover {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.2s ease-out;
+}
+
+.group:hover .group-hover\:glow {
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+  transition: box-shadow 0.2s ease-out;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+
+/* Base responsive font sizes */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+
+  h1 {
+    @apply text-2xl;
+  }
+
+  h2 {
+    @apply text-xl;
+  }
+
+  h3 {
+    @apply text-lg;
+  }
+
+  /* Touch-friendly button sizing */
+  button {
+    min-height: 48px;
+  }
+
+  /* Reduce padding on small screens */
+  .p-8 {
+    @apply p-4;
+  }
+
+  .p-6 {
+    @apply p-3;
+  }
+
+  /* Stack layouts on mobile */
+  .flex-col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Better spacing for mobile */
+  .gap-6 {
+    gap: 0.75rem;
+  }
+
+  .gap-4 {
+    gap: 0.5rem;
+  }
+
+  /* Mobile-optimized grids */
+  .grid-cols-2 {
+    @apply grid-cols-1;
+  }
+
+  .md\:grid-cols-3 {
+    @apply grid-cols-2;
+  }
+
+  /* Hide desktop-only elements */
+  .hidden-mobile {
+    @apply hidden;
+  }
+}
+
+/* Tablet optimizations (641px - 768px) */
+@media (min-width: 641px) and (max-width: 768px) {
+  html {
+    font-size: 15px;
+  }
+
+  /* Adjust padding */
+  .p-8 {
+    @apply p-5;
+  }
+
+  /* Better grid for tablet */
+  .md\:grid-cols-3 {
+    @apply grid-cols-2;
+  }
+
+  .lg\:grid-cols-4 {
+    @apply grid-cols-3;
+  }
+}
+
+/* Large screens (769px+) */
+@media (min-width: 769px) {
+  html {
+    font-size: 16px;
+  }
+
+  /* Desktop optimizations */
+  .lg\:flex-row {
+    @apply flex-row;
+  }
+
+  .lg\:w-1\/3 {
+    @apply w-1/3;
+  }
+
+  .lg\:w-2\/3 {
+    @apply w-2/3;
+  }
+}
+
+/* Landscape mode optimizations */
+@media (max-height: 600px) {
+  .p-4,
+  .p-6,
+  .p-8 {
+    @apply p-2;
+  }
+
+  .gap-4,
+  .gap-6 {
+    @apply gap-2;
+  }
+
+  .my-4,
+  .my-6,
+  .my-8 {
+    @apply my-1;
+  }
+
+  .mb-4,
+  .mb-6,
+  .mb-8 {
+    @apply mb-2;
+  }
+
+  .mt-4,
+  .mt-6,
+  .mt-8 {
+    @apply mt-2;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets */
+  button,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Remove hover states on touch devices */
+  .hover\:scale-110:hover {
+    transform: none;
+  }
+
+  .hover\:shadow:hover {
+    box-shadow: none;
+  }
+
+  /* Add active states for touch feedback */
+  button:active {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+}
+
+/* Print styles */
+@media print {
+  body {
+    @apply bg-white;
+  }
+
+  /* Hide interactive elements when printing */
+  button,
+  input,
+  select,
+  [onclick] {
+    @apply hidden;
+  }
+}

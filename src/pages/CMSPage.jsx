@@ -1,8 +1,38 @@
 import SketchButton from '../components/SketchButton';
 import ConceptEditor from '../components/ConceptEditor';
 import { PAGES } from '../constants/pages';
+import { useState } from 'react';
+
+const COLOR_MAP = {
+    'yellow-50': 'bg-yellow-50',
+    'blue-50': 'bg-blue-50',
+    'purple-50': 'bg-purple-50',
+    'green-50': 'bg-green-50',
+    'red-50': 'bg-red-50',
+    'orange-50': 'bg-orange-50',
+    'white': 'bg-white',
+};
+
+// Renders **bold** markers as actual bold text
+const renderFormattedText = (text) => {
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, i) =>
+        part.startsWith('**') && part.endsWith('**')
+            ? <strong key={i}>{part.slice(2, -2)}</strong>
+            : part
+    );
+};
 
 const CMSPage = ({ setPage, concepts, onAddConcept, onDeleteConcept }) => {
+  const [query, setQuery] = useState('');
+
+  const filteredConcepts = query.trim()
+    ? concepts.filter((c) =>
+        c.title.toLowerCase().includes(query.trim().toLowerCase()) ||
+        (c.subTitle || '').toLowerCase().includes(query.trim().toLowerCase())
+      )
+    : concepts;
+
   return (
     <div className="p-4 md:p-8">
       <SketchButton className="mb-8" onClick={() => setPage(PAGES.LANDING)}>
@@ -14,35 +44,83 @@ const CMSPage = ({ setPage, concepts, onAddConcept, onDeleteConcept }) => {
       <div className="max-w-3xl mx-auto">
         
         {/* RENDER THE EDITOR INTERFACE */}
-        <ConceptEditor onSave={onAddConcept} />
+        <ConceptEditor
+    onSave={onAddConcept}
+    existingConcepts={concepts}
+        />
         
         {/* RENDER DYNAMIC CONTENT */}
-        <h3 className="text-2xl font-extrabold mb-4">Current Concepts</h3>
-        <div className="space-y-10">
-            {concepts.map((concept, index) => (
-               <div key={concept.id} className={`p-5 border-2 border-black rounded-lg ${index % 2 === 0 ? 'bg-white' : 'bg-black text-white'} shadow-md`}>
-                  <div className="flex justify-between items-start mb-2">
-                      <div className="flex-1">
-                          <h3 className="text-2xl font-bold">{concept.title}</h3>
-                          {concept.subTitle && <p className={`text-lg italic ${index % 2 === 0 ? 'text-gray-600' : 'text-gray-300'}`}>{concept.subTitle}</p>}
-                      </div>
-                      {/* DELETE BUTTON */}
-                      <SketchButton 
-                          onClick={() => onDeleteConcept(concept.id)}
-                          variant={index % 2 === 0 ? 'inverted' : 'default'}
-                          className="text-xs !py-1 !px-2 ml-4 flex-shrink-0"
-                      >
-                          Delete
-                      </SketchButton>
-                  </div>
-                  
-                  <hr className={`my-2 border-dashed ${index % 2 === 0 ? 'border-gray-400' : 'border-gray-600'}`} />
-                  <p className={`mt-2 whitespace-pre-wrap ${index % 2 === 0 ? 'text-gray-700' : 'text-gray-200'}`}>
-                     {concept.content}
-                  </p>
-               </div>
-            ))}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <h3 className="text-2xl font-extrabold">
+                Current Concepts <span className="font-normal text-lg">({concepts.length})</span>
+            </h3>
+            {concepts.length > 0 && (
+                <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search concepts..."
+                    aria-label="Search concepts"
+                    className="p-2 border-2 border-black rounded shadow-md bg-white text-black text-sm"
+                />
+            )}
         </div>
+        <div className="space-y-10">
+
+    {filteredConcepts.length === 0 ? (
+
+        <div className="border-2 border-dashed border-black rounded-lg p-8 text-center">
+            <h4 className="text-xl font-bold mb-2">
+                {concepts.length === 0 ? "No Concepts Available" : "No matches found"}
+            </h4>
+            <p className="text-black">
+                {concepts.length === 0
+                    ? "Start by adding your first quantum concept."
+                    : `No concepts match "${query}".`}
+            </p>
+        </div>
+
+    ) : (
+
+        filteredConcepts.map((concept, index) => (
+            <div
+                key={concept.id}
+                className={`p-5 border-4 border-black rounded-lg ${COLOR_MAP[concept.color] || 'bg-white'} shadow-[8px_8px_0_0_#000000] animate-bounce-in`}
+            >
+                <div className="flex justify-between items-start mb-2">
+                    <div className="flex-1">
+                        <h3 className="text-2xl font-bold">
+                            {concept.title}
+                        </h3>
+
+                        {concept.subTitle && (
+                            <p className="text-lg italic text-black">
+                                {concept.subTitle}
+                            </p>
+                        )}
+                    </div>
+
+                    <SketchButton
+                        onClick={() => onDeleteConcept(concept.id)}
+                        variant="inverted"
+                        className="text-xs !py-1 !px-2 ml-4 flex-shrink-0"
+                        aria-label={`Delete concept: ${concept.title}`}
+                    >
+                        Delete
+                    </SketchButton>
+                </div>
+
+                <hr className="my-2 border-dashed border-black" />
+
+                <p className="mt-2 whitespace-pre-wrap text-black">
+                    {renderFormattedText(concept.content)}
+                </p>
+            </div>
+        ))
+
+    )}
+
+</div>
       </div>
     </div>
   );
