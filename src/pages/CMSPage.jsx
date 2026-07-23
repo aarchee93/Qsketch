@@ -52,7 +52,7 @@ const CMSPage = ({ setPage, concepts, onAddConcept, onDeleteConcept }) => {
         {/* RENDER DYNAMIC CONTENT */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <h3 className="text-2xl font-extrabold">
-                Current Concepts <span className="font-normal text-lg">({concepts.length})</span>
+                Research Library <span className="font-normal text-lg">({concepts.length})</span>
             </h3>
             {concepts.length > 0 && (
                 <input
@@ -71,11 +71,11 @@ const CMSPage = ({ setPage, concepts, onAddConcept, onDeleteConcept }) => {
 
         <div className="border-2 border-dashed border-black rounded-lg p-8 text-center">
             <h4 className="text-xl font-bold mb-2">
-                {concepts.length === 0 ? "No Concepts Available" : "No matches found"}
+                {concepts.length === 0 ? "No concepts in your research library." : "No matches found."}
             </h4>
             <p className="text-black">
                 {concepts.length === 0
-                    ? "Start by adding your first quantum concept."
+                    ? "Add your first quantum concept to begin."
                     : `No concepts match "${query}".`}
             </p>
         </div>

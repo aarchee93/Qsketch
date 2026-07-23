@@ -20,6 +20,7 @@ import { INITIAL_STATE, H0, H1, X0, X1, CNOT } from '../constants/quantumGates';
 import { LEVELS } from '../constants/gameLevels';
 import { safeApplyGate, safeIsTargetReached } from '../utils/quantumUtilsEnhanced';
 import { ACHIEVEMENTS, checkAchievements } from '../constants/achievements';
+import { playSuccessSound, playAchievementSound, playErrorSound } from '../utils/soundUtils';
 import {
   initializeGameProgress,
   saveLevelCompletion,
@@ -94,6 +95,9 @@ const GameView = ({ setPage }) => {
                       saveAchievements(actualNewAchievements);
                       const achievement = Object.values(ACHIEVEMENTS).find(a => a.id === actualNewAchievements[0]);
                       setUnlockedAchievement(achievement);
+                      playAchievementSound();
+                    } else {
+                      playSuccessSound();
                     }
 
                     showToast(
@@ -102,6 +106,7 @@ const GameView = ({ setPage }) => {
                     );
                 } else if (moves >= currentLevel.maxMoves) {
                     setGameStatus('lost');
+                    playErrorSound();
                     showToast(
                       `Too many moves! (${moves}/${currentLevel.maxMoves})`,
                       'error'

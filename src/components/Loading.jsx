@@ -1,5 +1,6 @@
 /**
- * Loading Spinner Component
+ * Loading Spinner Component — a hand-drawn-style wobbly ring instead of a
+ * perfectly uniform circle, to match the sketch aesthetic.
  */
 export const Spinner = ({ size = 'md', color = 'text-black' }) => {
   const sizeClass = {
@@ -16,18 +17,17 @@ export const Spinner = ({ size = 'md', color = 'text-black' }) => {
         fill="none"
         viewBox="0 0 24 24"
       >
-        <circle
+        {/* Slightly irregular path instead of a perfect circle, for a hand-drawn feel */}
+        <path
           className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
+          d="M12 2.5 C 17.5 2.2, 21.8 6.4, 21.5 12 C 21.8 17.6, 17.5 21.8, 12 21.5 C 6.4 21.8, 2.2 17.6, 2.5 12 C 2.2 6.4, 6.4 2.2, 12 2.5 Z"
           stroke="currentColor"
-          strokeWidth="4"
+          strokeWidth="2.5"
         />
         <path
-          className="opacity-75"
+          className="opacity-90"
           fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          d="M12 2.5 C 15.5 2.3, 18.8 4.2, 20.4 7.2 L 17 9.2 C 15.9 7.3, 14 6.1, 12 6.2 Z"
         />
       </svg>
     </div>
@@ -37,7 +37,7 @@ export const Spinner = ({ size = 'md', color = 'text-black' }) => {
 /**
  * Loading Overlay Component
  */
-export const LoadingOverlay = ({ visible = false, message = 'Loading...' }) => {
+export const LoadingOverlay = ({ visible = false, message = 'Preparing Laboratory...' }) => {
   if (!visible) return null;
 
   return (
@@ -53,35 +53,27 @@ export const LoadingOverlay = ({ visible = false, message = 'Loading...' }) => {
 };
 
 /**
- * Confetti Component for celebration
+ * Achievement Stamp — replaces confetti with a single hand-stamped "thunk"
+ * mark, matching the lab-notebook aesthetic better than falling particles.
+ * Keeps the same trigger/onComplete API so existing call sites don't change.
  */
 export const Confetti = ({ trigger = false, onComplete }) => {
   if (!trigger) return null;
 
-  const confetti = Array.from({ length: 50 }).map((_, i) => ({
-    id: i,
-    left: Math.random() * 100,
-    delay: Math.random() * 0.3,
-    duration: 2 + Math.random() * 1,
-  }));
-
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden">
-      {confetti.map((c, index) => (
+    <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-40">
+      <div
+        className="animate-badge-pop"
+        onAnimationEnd={onComplete}
+      >
         <div
-          key={c.id}
-          className="absolute animate-confetti"
-          style={{
-            left: `${c.left}%`,
-            top: '-20px',
-            animationDelay: `${c.delay}s`,
-            animationDuration: `${c.duration}s`,
-          }}
-          onAnimationEnd={index === confetti.length - 1 ? onComplete : undefined}
+          className="w-40 h-40 rounded-full border-8 border-black flex flex-col items-center justify-center text-black bg-white/90 shadow-[6px_6px_0_0_#000000] -rotate-12"
+          style={{ borderStyle: 'double' }}
         >
-          {['🎉', '🎊', '⭐', '✨', '🌟'][Math.floor(Math.random() * 5)]}
+          <span className="text-3xl" aria-hidden="true">✓</span>
+          <span className="font-extrabold text-sm tracking-widest">VERIFIED</span>
         </div>
-      ))}
+      </div>
     </div>
   );
 };

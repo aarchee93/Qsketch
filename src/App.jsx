@@ -6,6 +6,7 @@ import { safeApplyGate, safeMeasureState } from './utils/quantumUtilsEnhanced';
 import { safeGetStorage, safeSetStorage } from './utils/storageUtils';
 import { useConfirm } from './hooks/useConfirm';
 import { useToast, ToastContainer } from './components/Toast';
+import { playMeasureSound, playSuccessSound, playErrorSound, isMuted, setMuted } from './utils/soundUtils';
 import ConfirmModal from './components/ConfirmModal';
 import LandingPage from './pages/LandingPage';
 import CMSPage from './pages/CMSPage';
@@ -30,6 +31,11 @@ const initializeConcepts = () => {
     }
 };
 
+// Timings for the "alive" experiment sequence: press -> slide -> wire pulse -> qubit reacts -> state updates.
+const GATE_ANIMATION_MS = 550;
+const MEASURE_ANIMATION_MS = 600;
+const RESET_ANIMATION_MS = 450;
+
 const App = () => {
   const [currentPage, setCurrentPage] = useState(PAGES.LANDING);
   const [circuit, setCircuit] = useState([]);
@@ -37,6 +43,19 @@ const App = () => {
   const [measurementOutcome, setMeasurementOutcome] = useState(null);
   const [lastAction, setLastAction] = useState("START");
   const [resourceLessonId, setResourceLessonId] = useState(null);
+
+  // Animation-timing state: while these are set, the visible circuit/state
+  // hasn't committed yet — the UI is mid gate-slide / collapse / reset, so the
+  // experiment feels like it's actually happening rather than snapping instantly.
+  const [pendingGate, setPendingGate] = useState(null);
+  const [isMeasuring, setIsMeasuring] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+
+  const [muted, setMutedState] = useState(() => isMuted());
+  const toggleMute = useCallback(() => {
+    setMuted(!isMuted());
+    setMutedState(isMuted());
+  }, []);
 
   // Jumps to the Quantum Learning Centre and opens the lesson matching the
   // gate the assistant is currently explaining — closes the Simulator → Resources loop.
@@ -73,9 +92,12 @@ const App = () => {
           }
           return updatedConcepts;
       });
+      showToast('Concept added to your research library.', 'success');
+      playSuccessSound();
     } catch (error) {
       console.error('Error adding concept:', error);
       showToast('Failed to add concept. Please try again.', 'error');
+      playErrorSound();
     }
   }, [showToast]);
 
@@ -83,7 +105,7 @@ const App = () => {
   const handleDeleteConcept = useCallback(async (conceptId) => {
     try {
       const confirmed = await requestConfirm({
-          title: 'Delete this concept?',
+          title: 'Delete this concept from your research library?',
           message: 'This will remove the concept from your library. This cannot be undone.',
           confirmLabel: 'Delete',
           cancelLabel: 'Cancel',
@@ -106,6 +128,7 @@ const App = () => {
     } catch (error) {
       console.error('Error deleting concept:', error);
       showToast('Failed to delete concept. Please try again.', 'error');
+      playErrorSound();
     }
 
 }, [requestConfirm, showToast]);
@@ -113,9 +136,14 @@ const App = () => {
   // Current state is the last item in history
   const currentState = history[history.length - 1];
 
-  // Logic for applying gates
+  // Logic for applying gates. The gate is "played into" the circuit over
+  // GATE_ANIMATION_MS before the state actually commits, so the button
+  // press, the slide-in, the wire pulse, and the qubit's reaction all have
+  // time to happen in sequence instead of everything updating in one frame.
   const applyNewGate = useCallback(async (gateName, matrix) => {
     try {
+      if (pendingGate || isMeasuring || isResetting) return;
+
       // Reset measurement on new gate
       if (measurementOutcome !== null) {
         const continueCircuit = await requestConfirm({
@@ -134,56 +162,70 @@ const App = () => {
         setMeasurementOutcome(null);
       }
 
-      // Apply gate with error handling
+      // Apply gate with error handling (computed now, committed after the animation)
       const gateResult = safeApplyGate(matrix, currentState);
       
       if (!gateResult.success) {
         console.error('Gate application failed:', gateResult.error);
         showToast(`Error: ${gateResult.error}`, 'error');
+        playErrorSound();
         return;
       }
 
-      setCircuit(prev => [...prev, gateName]);
+      setPendingGate(gateName);
       setLastAction(gateName);
-      setHistory(prev => [...prev, gateResult.result]);
+
+      setTimeout(() => {
+        setCircuit(prev => [...prev, gateName]);
+        setHistory(prev => [...prev, gateResult.result]);
+        setPendingGate(null);
+        showToast('Gate successfully applied.', 'success');
+      }, GATE_ANIMATION_MS);
     } catch (error) {
       console.error('Unexpected error applying gate:', error);
-      showToast('An unexpected error occurred. Please try again.', 'error');
+      showToast('The experiment could not be completed. Please reset the laboratory.', 'error');
+      playErrorSound();
     }
-  }, [currentState, measurementOutcome, requestConfirm, showToast]);
+  }, [currentState, measurementOutcome, pendingGate, isMeasuring, isResetting, requestConfirm, showToast]);
 
-  // Measurement handler
+  // Measurement handler — plays the collapse animation before the outcome
+  // and updated (collapsed) state vector are committed.
   const handleMeasure = useCallback(() => {
     try {
-      // Prevent measurement if already collapsed
-      if (measurementOutcome) return; 
+      if (measurementOutcome || pendingGate || isMeasuring || isResetting) return;
 
       const measureResult = safeMeasureState(currentState);
       
       if (!measureResult.success) {
         console.error('Measurement failed:', measureResult.error);
         showToast(`Measurement error: ${measureResult.error}`, 'error');
+        playErrorSound();
         return;
       }
 
-      // Update history with the collapsed state (new step, but no new gate)
-      setHistory(prev => [...prev, measureResult.measuredState]); 
-
+      setIsMeasuring(true);
       setLastAction("MEASURE");
-      setMeasurementOutcome(measureResult.outcome);
+      playMeasureSound();
+
+      setTimeout(() => {
+        setHistory(prev => [...prev, measureResult.measuredState]);
+        setMeasurementOutcome(measureResult.outcome);
+        setIsMeasuring(false);
+      }, MEASURE_ANIMATION_MS);
     } catch (error) {
       console.error('Unexpected error during measurement:', error);
-      showToast('An unexpected error occurred during measurement. Please try again.', 'error');
+      showToast('The experiment could not be completed. Please reset the laboratory.', 'error');
+      playErrorSound();
     }
-  }, [currentState, measurementOutcome, showToast]);
+  }, [currentState, measurementOutcome, pendingGate, isMeasuring, isResetting, showToast]);
 
-  // Reset handler
+  // Reset handler — plays the qubit's reset spin before clearing the circuit.
   const handleReset = useCallback(async () => {
     try {
       const confirmed = await requestConfirm({
-          title: 'Reset the circuit?',
+          title: 'Reset Experiment?',
           message: 'This will clear all applied gates and return to the initial |00⟩ state.',
-          confirmLabel: 'Reset',
+          confirmLabel: 'Reset Experiment',
           cancelLabel: 'Cancel',
       });
 
@@ -191,19 +233,25 @@ const App = () => {
           return;
       }
 
-      setCircuit([]);
-      setHistory([INITIAL_STATE]);
-      setMeasurementOutcome(null);
-      setLastAction("START");
+      setIsResetting(true);
+      setTimeout(() => {
+        setCircuit([]);
+        setHistory([INITIAL_STATE]);
+        setMeasurementOutcome(null);
+        setLastAction("START");
+        setIsResetting(false);
+      }, RESET_ANIMATION_MS);
     } catch (error) {
       console.error('Error resetting circuit:', error);
-      showToast('An error occurred while resetting. Please try again.', 'error');
+      showToast('The experiment could not be completed. Please reset the laboratory.', 'error');
+      playErrorSound();
     }
   }, [requestConfirm, showToast]);
 
   // Undo handler
   const handleUndo = useCallback(() => {
     try {
+      if (pendingGate || isMeasuring || isResetting) return;
       if (measurementOutcome) {
           // If the last step was a measurement, simply undo the collapse
           setHistory(prev => prev.slice(0, -1));
@@ -214,9 +262,10 @@ const App = () => {
       }
     } catch (error) {
       console.error('Error during undo:', error);
-      showToast('An error occurred while undoing. Please try again.', 'error');
+      showToast('The experiment could not be completed. Please reset the laboratory.', 'error');
+      playErrorSound();
     }
-  }, [history.length, measurementOutcome, showToast]);
+  }, [history.length, measurementOutcome, pendingGate, isMeasuring, isResetting, showToast]);
 
   // Conditional Rendering based on the current page state
   const renderPage = () => {
@@ -237,6 +286,9 @@ const App = () => {
             measurementOutcome={measurementOutcome}
             handleMeasure={handleMeasure}
             onViewLesson={handleViewLesson}
+            pendingGate={pendingGate}
+            isMeasuring={isMeasuring}
+            isResetting={isResetting}
           />
         );
       case PAGES.CMS:
@@ -269,12 +321,19 @@ const App = () => {
       `}</style>
       
       {/* Header (Visible on all pages except Landing) */}
-     {/* Header (Visible on all pages except Landing) */}
-      <header className={`text-center p-6 bg-white ${currentPage === PAGES.LANDING ? 'hidden' : 'border-b-4 border-double border-black shadow-md'}`}>
+      <header className={`relative text-center p-6 bg-white ${currentPage === PAGES.LANDING ? 'hidden' : 'border-b-4 border-double border-black shadow-md'}`}>
         <h1 className="text-3xl font-extrabold tracking-tight">QUBIT SKETCHPAD</h1>
+        <button
+          onClick={toggleMute}
+          title={muted ? 'Unmute lab sounds' : 'Mute lab sounds'}
+          aria-label={muted ? 'Unmute lab sounds' : 'Mute lab sounds'}
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center border-2 border-black rounded-full bg-white hover:bg-black hover:text-white transition-colors"
+        >
+          {muted ? '🔇' : '🔊'}
+        </button>
       </header>
       
-      <main className="max-w-6xl mx-auto">
+      <main key={currentPage} className="max-w-6xl mx-auto animate-page-transition">
         {renderPage()}
       </main>
       

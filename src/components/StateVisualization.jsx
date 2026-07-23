@@ -6,7 +6,7 @@ const EPSILON = 1e-6;
 // State Visualization Component (Doodley Bar Chart)
 // Amplitudes can be negative (quantum phase) — we show sign, not just |amplitude|^2,
 // since the sign is what drives interference and is otherwise invisible to learners.
-const StateVisualization = ({ stateVector, targetVector }) => {
+const StateVisualization = ({ stateVector, targetVector, measurementOutcome = null }) => {
   const probabilities = stateVector.map(amplitude => Math.pow(amplitude, 2));
   const targetProbabilities = targetVector ? targetVector.map(amplitude => Math.pow(amplitude, 2)) : [];
 
@@ -70,8 +70,14 @@ const StateVisualization = ({ stateVector, targetVector }) => {
           const isGlowing = glowingIndices.has(index);
           const sign = getSign(stateVector[index]);
           const isNegative = sign < 0;
+          const isCollapsedAway = measurementOutcome && basisStates[index] !== measurementOutcome;
           return (
-            <div key={index} className="flex flex-col items-center w-1/5 h-full relative">
+            <div
+              key={index}
+              className={`flex flex-col items-center w-1/5 h-full relative transition-opacity duration-500 ${
+                isCollapsedAway ? 'animate-bar-collapse-fade' : ''
+              }`}
+            >
               {/* Target Indicator (Game Mode Only) - Using pattern for black/white theme */}
               {isTarget && (
                  <div className="absolute top-[-10px] font-extrabold text-xl" aria-hidden="true">

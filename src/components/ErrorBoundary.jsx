@@ -28,9 +28,9 @@ class ErrorBoundary extends Component {
       return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-white p-4">
           <div className="max-w-md w-full bg-white border-4 border-black rounded-xl shadow-lg p-6">
-            <h1 className="text-2xl font-extrabold text-black mb-4">⚠️ Oops! Something Went Wrong</h1>
+            <h1 className="text-2xl font-extrabold text-black mb-4">⚠️ The experiment could not be completed</h1>
             <p className="text-black mb-4">
-              The application encountered an unexpected error. Please try refreshing the page.
+              Something went wrong in the laboratory. Please reset the laboratory by refreshing the page.
             </p>
             
             {/* Show error details in development */}
@@ -52,7 +52,7 @@ class ErrorBoundary extends Component {
               onClick={this.handleReset}
               className="w-full px-4 py-2 bg-black text-white font-bold rounded-lg hover:bg-black transition"
             >
-              Refresh & Try Again
+              Reset Laboratory & Try Again
             </button>
           </div>
         </div>

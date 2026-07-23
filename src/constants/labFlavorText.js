@@ -178,6 +178,17 @@ export const ASSISTANT_VARIANTS = {
   ],
 };
 
+// Short "in progress" phrasing for the Observation Card while a gate/measurement
+// is mid-animation — the "before" half of the Observation Card pattern.
+export const OBSERVATION_APPLYING = {
+  H0: ['Applying Hadamard to Q0…', 'Creating superposition…'],
+  H1: ['Applying Hadamard to Q1…', 'Creating superposition…'],
+  X0: ['Applying Pauli-X to Q0…', 'Flipping the qubit…'],
+  X1: ['Applying Pauli-X to Q1…', 'Flipping the qubit…'],
+  CNOT: ['Applying CNOT…', 'Entangling Q0 and Q1…'],
+  MEASURE: ['Measuring the qubits…', 'Collapsing the wavefunction…'],
+};
+
 export const DID_YOU_KNOW_FACTS = [
   'A single qubit in superposition can represent both 0 and 1 at once — but measuring it always returns a classical answer.',
   'The Hadamard gate is one of the most-used gates in quantum computing because it creates equal superposition from a definite state.',
@@ -188,3 +199,13 @@ export const DID_YOU_KNOW_FACTS = [
   'Two entangled qubits need only one measurement to reveal information about both of them.',
   'Quantum computers don\u2019t replace classical ones — they\u2019re expected to specialize in problems like factoring and simulation.',
 ];
+
+export const RESEARCH_NOTES = {
+  START: 'Every quantum circuit begins in a known, definite state — there is no superposition until a gate creates one.',
+  H0: 'A single Hadamard spreads Q0 into 50/50 — apply it twice and the two spreads interfere back into a definite value.',
+  H1: 'Applying H twice returns the qubit to its original basis — the two 50/50 spreads interfere and cancel back to a definite value.',
+  X0: 'Pauli-X just flips |0⟩↔|1⟩ — no superposition here, it behaves exactly like a classical NOT gate.',
+  X1: 'Pauli-X just flips |0⟩↔|1⟩ — no superposition here, it behaves exactly like a classical NOT gate.',
+  CNOT: 'CNOT only flips Q1 when Q0 is |1⟩ — combined with a Hadamard first, this is how entanglement is created.',
+  MEASURE: 'Once measured, the superposition is gone for good — repeating the measurement will keep giving the same collapsed result.',
+};

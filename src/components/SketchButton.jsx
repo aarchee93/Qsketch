@@ -41,7 +41,7 @@ const SketchButton = forwardRef(({
         px-4 py-2 border-2 border-black shadow-[4px_4px_0_0_#000000] 
         font-bold transition-all duration-100 ease-out 
         hover:shadow-[2px_2px_0_0_#000000] hover:translate-x-[2px] hover:translate-y-[2px]
-        active:shadow-none active:translate-x-[4px] active:translate-y-[4px] active:scale-95
+        active:shadow-none active:translate-x-[4px] active:translate-y-[4px] active:scale-95 active:-rotate-1
         text-sm md:text-base whitespace-nowrap
         disabled:opacity-50 disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0 disabled:cursor-not-allowed
         focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black

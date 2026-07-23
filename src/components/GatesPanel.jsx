@@ -1,4 +1,5 @@
 import SketchButton from './SketchButton';
+import CornerDoodle from './CornerDoodle';
 import { H0, H1, X0, X1, CNOT } from '../constants/quantumGates';
 import { GATE_INFO } from '../constants/gateInfo';
 
@@ -10,10 +11,11 @@ const GatesPanel = ({
   handleReset,
   disabled = false,
   canUndo = false,
-  resetLabel = "Reset",
+  resetLabel = "Reset Experiment",
   extraButton = null,
 }) => (
-  <div className="flex flex-col space-y-4 p-4 border-2 border-black bg-white rounded-lg shadow-xl" role="group" aria-label={title}>
+  <div className="relative flex flex-col space-y-4 p-4 border-2 border-black bg-white rounded-lg shadow-xl" role="group" aria-label={title}>
+    <CornerDoodle position="top-right" variant="star" />
     <h3 className="text-xl font-extrabold text-center border-b-2 border-dashed border-black pb-2">{title}</h3>
     <div className="grid grid-cols-2 gap-4">
       <SketchButton
@@ -70,9 +72,9 @@ const GatesPanel = ({
         disabled={disabled}
         variant="inverted"
         className="font-extrabold text-lg"
-        aria-label="Measure qubits, collapses the quantum state"
+        aria-label="Perform measurement, collapses the quantum state"
       >
-        Measure Qubits! <span aria-hidden="true">🤯</span>
+        Perform Measurement <span aria-hidden="true">🤯</span>
       </SketchButton>
     )}
 
@@ -87,6 +89,9 @@ const GatesPanel = ({
       </SketchButton>
       {extraButton}
     </div>
+    <p className="text-center text-[11px] text-black/50 -mt-2" aria-hidden="true">
+      Shortcuts: H · X · C · M · R
+    </p>
   </div>
 );
 

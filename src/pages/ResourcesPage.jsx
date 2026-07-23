@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import SketchButton from '../components/SketchButton';
+import ResearchNote from '../components/ResearchNote';
 import { PAGES } from '../constants/pages';
 import {
   LEARNING_CONTENT,
@@ -25,12 +26,19 @@ const DifficultyBadge = ({ difficulty }) => (
 
 const ResourcesPage = ({ setPage }) => {
   const [activeTab, setActiveTab] = useState("learn");
+  const [expandedId, setExpandedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [highlightedLessonId, setHighlightedLessonId] = useState(null);
   const lessonRefs = useRef({});
 
   const filteredContent = LEARNING_CONTENT[activeTab].filter(item => {
     const q = searchQuery.toLowerCase();
+    const jumpToLesson = (lessonId) => {
+  setSearchQuery("");
+  setActiveTab("learn");
+  setHighlightedLessonId(lessonId);
+  setExpandedId(lessonId); // add this line
+};
     const haystack = [item.title, item.term, item.description, item.definition, item.difficulty]
       .filter(Boolean).join(" ").toLowerCase();
     return haystack.includes(q);
@@ -118,7 +126,7 @@ const ResourcesPage = ({ setPage }) => {
 
           {filteredContent.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
-              <h4 className="text-xl font-semibold mb-2">No results</h4>
+              <h4 className="text-xl font-semibold mb-2">No matching resources.</h4>
               <p>Try a different search term, or clear the search box.</p>
             </div>
           ) : activeTab === "glossary" ? (
@@ -184,7 +192,41 @@ const ResourcesPage = ({ setPage }) => {
                     <span className="text-sm text-gray-500">{item.readTime}</span>
                   </div>
                   <h3 className="text-2xl font-bold mb-3">{item.title}</h3>
-                  <p className="text-gray-700 leading-relaxed mb-5">{item.description}</p>
+
+                  {item.story ? (
+  <>
+    <button
+      onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
+      className="text-sm font-bold underline hover:no-underline mb-4"
+    >
+      {expandedId === item.id ? '▲ Show less' : '▼ Read full lesson'}
+    </button>
+    {expandedId === item.id && (
+      <div className="space-y-4 mb-5">
+        <section>
+          <h4 className="font-extrabold text-sm uppercase tracking-wide text-gray-500 mb-1">📖 Story</h4>
+          <p className="text-gray-700 leading-relaxed">{item.story}</p>
+        </section>
+        <section>
+          <h4 className="font-extrabold text-sm uppercase tracking-wide text-gray-500 mb-1">🎓 Explanation</h4>
+          <p className="text-gray-700 leading-relaxed">{item.explanation}</p>
+        </section>
+        <section>
+          <h4 className="font-extrabold text-sm uppercase tracking-wide text-gray-500 mb-1">🧠 Technical Details</h4>
+          <p className="text-gray-700 leading-relaxed">{item.technicalDetails}</p>
+        </section>
+        <section>
+          <h4 className="font-extrabold text-sm uppercase tracking-wide text-gray-500 mb-1">🌍 Real World Applications</h4>
+          <p className="text-gray-700 leading-relaxed">{item.realWorldApplications}</p>
+        </section>
+        {item.researchNote && <ResearchNote>{item.researchNote}</ResearchNote>}
+      </div>
+    )}
+  </>
+) : (
+  <p className="text-gray-700 leading-relaxed mb-5">{item.description}</p>
+)}
+
                   <div className="flex gap-3 flex-wrap">
                     {item.url && (
                       <a
