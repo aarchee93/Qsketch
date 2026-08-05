@@ -76,6 +76,12 @@ const App = () => {
     setConcepts(initializeConcepts());
 }, []);
 
+  // Page navigation is in-app rather than a full browser navigation, so retain
+  // neither the previous page's scroll position nor its lower viewport.
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [currentPage]);
+
   // Handler to add a new concept (passed down to the editor component)
   const handleAddConcept = useCallback((newConcept) => {
     try {
