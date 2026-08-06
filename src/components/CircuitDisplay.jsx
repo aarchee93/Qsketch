@@ -12,7 +12,7 @@ const CircuitDisplay = ({
         circuit.map((gate, index) => (
           <span
             key={index}
-            className="px-3 py-1 bg-black text-white rounded-full text-sm font-mono shadow-md animate-bounce-in"
+            className="px-3 py-1 bg-black text-white rounded-full text-sm font-mono shadow-md animate-bounce-in cursor-default select-none"
             style={{ animationDelay: `${index * 80}ms`, animationFillMode: 'backwards' }}
           >
             {gate}

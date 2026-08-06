@@ -1,0 +1,440 @@
+/* =========================================================
+   GuideAnimation.css  — Quantum Guide
+   B&W sketch aesthetic only. No colour.
+   ========================================================= */
+
+/* ─────────────────────────────────────────────
+   CHARACTER — IDLE FLOAT
+   ───────────────────────────────────────────── */
+@keyframes guide-char-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
+/* ─────────────────────────────────────────────
+   CHARACTER — ENTRY JUMP
+   Launches from button, overshoots, squash-lands
+   ───────────────────────────────────────────── */
+@keyframes guide-char-jump-in {
+  0%   { transform: scale(0.12) translateY(60px); opacity: 0; }
+  38%  { transform: scale(1.18) translateY(-16px); opacity: 1; }
+  56%  { transform: scale(0.92, 1.08) translateY(5px); }
+  72%  { transform: scale(1.05, 0.96) translateY(-2px); }
+  86%  { transform: scale(0.98, 1.01) translateY(1px); }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* ─────────────────────────────────────────────
+   CHARACTER — EXIT JUMP (back into button)
+   ───────────────────────────────────────────── */
+@keyframes guide-char-jump-out {
+  0%   { transform: scale(1) translateY(0); opacity: 1; }
+  25%  { transform: scale(1.08) translateY(-8px); opacity: 1; }
+  55%  { transform: scale(0.65) translateY(22px); opacity: 0.7; }
+  100% { transform: scale(0.06) translateY(56px); opacity: 0; }
+}
+
+/* ─────────────────────────────────────────────
+   CHARACTER — CELEBRATE HOP
+   ───────────────────────────────────────────── */
+@keyframes guide-char-celebrate {
+  0%   { transform: translateY(0) rotate(0deg) scale(1); }
+  18%  { transform: translateY(-16px) rotate(-5deg) scale(1.08); }
+  40%  { transform: translateY(-22px) rotate(4deg) scale(1.11); }
+  62%  { transform: translateY(-8px) rotate(-2deg) scale(1.04); }
+  80%  { transform: translateY(-2px) rotate(1deg) scale(1.01); }
+  100% { transform: translateY(0) rotate(0deg) scale(1); }
+}
+
+/* ─────────────────────────────────────────────
+   ARM — WAVE
+   ───────────────────────────────────────────── */
+@keyframes guide-wave-arm {
+  0%, 100% { transform: rotate(0deg); }
+  20%       { transform: rotate(-22deg) translateY(-5px); }
+  50%       { transform: rotate(16deg) translateY(-9px); }
+  75%       { transform: rotate(-12deg) translateY(-4px); }
+}
+
+/* ─────────────────────────────────────────────
+   ARM — POINT PULSE
+   ───────────────────────────────────────────── */
+@keyframes guide-point-arm {
+  0%, 100% { transform: rotate(0deg) translateX(0px); }
+  50%       { transform: rotate(-4deg) translateX(3px); }
+}
+
+/* ─────────────────────────────────────────────
+   BUTTON — IDLE BREATH PULSE
+   ───────────────────────────────────────────── */
+@keyframes guide-btn-breathe {
+  0%, 100% { transform: scale(1); box-shadow: 3px 3px 0 #000; }
+  50%       { transform: scale(1.05); box-shadow: 4px 4px 0 #000; }
+}
+
+/* ─────────────────────────────────────────────
+   BUTTON — PRESS
+   ───────────────────────────────────────────── */
+@keyframes guide-btn-press {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(0.86); }
+  100% { transform: scale(1); }
+}
+
+/* ─────────────────────────────────────────────
+   SPEECH BUBBLE — SCALE IN / OUT
+   ───────────────────────────────────────────── */
+@keyframes guide-bubble-in {
+  0%   { transform: scale(0.25) translateY(6px); opacity: 0; }
+  65%  { transform: scale(1.05) translateY(-2px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@keyframes guide-bubble-out {
+  0%   { transform: scale(1) translateY(0); opacity: 1; }
+  100% { transform: scale(0.15) translateY(6px); opacity: 0; }
+}
+
+/* ─────────────────────────────────────────────
+   GATE CARD — POP OUT (CSS-vars drive targets)
+   ───────────────────────────────────────────── */
+@keyframes guide-card-pop {
+  0%   { transform: translate(0,0) scale(0.08) rotate(0deg); opacity: 0; }
+  52%  { transform: var(--card-overshoot) scale(1.14) rotate(var(--card-tilt)); opacity: 1; }
+  72%  { transform: var(--card-final) scale(0.95) rotate(calc(var(--card-tilt) * -0.25)); opacity: 1; }
+  100% { transform: var(--card-final) scale(1) rotate(var(--card-tilt)); opacity: 1; }
+}
+
+/* ─────────────────────────────────────────────
+   GATE CARD — AMBIENT FLOAT
+   Uses plain translate so no CSS-var conflict.
+   Applied only after pop settles; translateX/Y
+   are injected as inline style + override here.
+   ───────────────────────────────────────────── */
+@keyframes guide-card-float {
+  0%, 100% { margin-top: 0px; }
+  50%       { margin-top: -5px; }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   GATE CARD — HOVER WIGGLE (pure CSS, no vars)
+   The wiggle is a translateX oscillation ONLY — no rotate/scale
+   that could conflict with the inline translate+rotate applied
+   during the floating phase.
+   ───────────────────────────────────────────── */
+@keyframes guide-card-wiggle {
+  0%, 100% { margin-left: 0px; }
+  25%       { margin-left: 4px; }
+  75%       { margin-left: -4px; }
+}
+
+/* ─────────────────────────────────────────────
+   GATE CARD — FOLD BACK INTO ROBOT
+   ───────────────────────────────────────────── */
+@keyframes guide-card-fold {
+  0%   { transform: var(--card-final) scale(1) rotate(var(--card-tilt)); opacity: 1; }
+  100% { transform: translate(0,0) scale(0.05) rotate(0deg); opacity: 0; }
+}
+
+/* ─────────────────────────────────────────────
+   GATE CARD — CLICK BOUNCE
+   Uses margin-top only — no transform var conflict
+   ───────────────────────────────────────────── */
+@keyframes guide-card-bounce {
+  0%   { margin-top: 0px; }
+  30%  { margin-top: 5px; }
+  65%  { margin-top: -6px; }
+  100% { margin-top: 0px; }
+}
+
+/* ─────────────────────────────────────────────
+   DUST / MOTION LINES — landing
+   ───────────────────────────────────────────── */
+@keyframes guide-dust {
+  0%   { opacity: 1; transform: scale(0.4); }
+  55%  { opacity: 0.6; transform: scale(1.3); }
+  100% { opacity: 0; transform: scale(1.9); }
+}
+
+/* ─────────────────────────────────────────────
+   SPARKLE STAR POP
+   ───────────────────────────────────────────── */
+@keyframes guide-sparkle {
+  0%   { transform: scale(0) rotate(0deg);    opacity: 0; }
+  45%  { transform: scale(1.4) rotate(50deg); opacity: 1; }
+  100% { transform: scale(0) rotate(95deg);   opacity: 0; }
+}
+
+/* ─────────────────────────────────────────────
+   DETAIL PANEL — SLIDE IN
+   ───────────────────────────────────────────── */
+@keyframes guide-panel-slide {
+  0%   { transform: translateY(12px); opacity: 0; }
+  100% { transform: translateY(0);    opacity: 1; }
+}
+
+/* =========================================================
+   UTILITY CLASSES
+   ========================================================= */
+
+.guide-char-idle {
+  animation: guide-char-float 3.2s ease-in-out infinite;
+}
+.guide-char-entering {
+  animation: guide-char-jump-in 0.56s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.guide-char-exiting {
+  animation: guide-char-jump-out 0.42s ease-in both;
+}
+.guide-char-celebrating {
+  animation: guide-char-celebrate 0.72s ease-out;
+}
+
+.guide-btn-idle {
+  animation: guide-btn-breathe 2.8s ease-in-out infinite;
+}
+.guide-btn-pressing {
+  animation: guide-btn-press 0.22s ease-out both;
+}
+
+.guide-bubble-entering {
+  animation: guide-bubble-in 0.26s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.guide-bubble-exiting {
+  animation: guide-bubble-out 0.16s ease-in both;
+}
+
+/* Card pop — used during entry phase */
+.guide-card-popping {
+  animation: guide-card-pop 0.52s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+/* Card fold — used during close */
+.guide-card-folding {
+  animation: guide-card-fold 0.32s ease-in both;
+}
+/* Hover wiggle — applied only while hovered; no CSS-var dependency */
+.guide-card-hovered {
+  animation: guide-card-wiggle 0.45s ease-in-out infinite;
+}
+/* Click bounce */
+.guide-card-bouncing {
+  animation: guide-card-bounce 0.28s ease-out both;
+}
+/* Ambient float — applied once pop settles; transform handled by inline style */
+.guide-card-floating {
+  animation: guide-card-float 3s ease-in-out infinite;
+}
+
+.guide-panel-entering {
+  animation: guide-panel-slide 0.28s ease-out both;
+}
+
+/* =========================================================
+   LAYOUT & STRUCTURAL
+   ========================================================= */
+
+/* Fixed anchor — bottom-right corner of viewport */
+.guide-anchor {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9990;
+  pointer-events: none; /* re-enabled per child */
+}
+
+/* Every direct child of anchor needs pointer-events */
+.guide-anchor > * {
+  pointer-events: auto;
+}
+
+/* ── SPEECH BUBBLE ─────────────────────────────── */
+.guide-bubble {
+  position: relative;
+  display: inline-block;
+  border: 2.5px solid #000;
+  background: #fff;
+  border-radius: 14px;
+  border-bottom-right-radius: 4px;
+  padding: 9px 13px 9px 15px;
+  font-family: 'Kalam', cursive;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.4;
+  max-width: 210px;
+  box-shadow: 3px 3px 0 #000;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Tail — outer black triangle */
+.guide-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -14px;
+  right: 16px;
+  border-left:   9px solid transparent;
+  border-right:  4px solid transparent;
+  border-top:   14px solid #000;
+}
+/* Tail — inner white fill */
+.guide-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -9px;
+  right: 18px;
+  z-index: 1;
+  border-left:   7px solid transparent;
+  border-right:  3px solid transparent;
+  border-top:   10px solid #fff;
+}
+
+/* ── GATE CARD BASE ───────────────────────────── */
+.guide-gate-card {
+  position: absolute;
+  bottom: 0;
+  right:  0;
+  width: 80px;
+  background: #fff;
+  border: 2.5px solid #000;
+  border-radius: 10px;
+  padding: 10px 6px 8px;
+  text-align: center;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  box-shadow: 3px 3px 0 #000;
+  font-family: 'Kalam', cursive;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+  /* z-index managed per-card via inline style */
+}
+
+.guide-gate-card:focus-visible {
+  outline: 2.5px dashed #000;
+  outline-offset: 2px;
+}
+
+.guide-gate-card:active {
+  box-shadow: 1px 1px 0 #000;
+}
+
+.guide-gate-card__symbol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 6px;
+  border: 2.5px solid #000;
+  border-radius: 6px;
+  background: #000;
+  color: #fff;
+  font-family: 'VT323', monospace;
+  font-size: 1.3rem;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.guide-gate-card__name {
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #000;
+  pointer-events: none;
+}
+
+.guide-gate-card__sub {
+  font-size: 0.6rem;
+  color: #555;
+  margin-top: 2px;
+  line-height: 1.2;
+  pointer-events: none;
+}
+
+/* ── GATE DETAIL PANEL ────────────────────────── */
+.guide-detail-panel {
+  background: #fff;
+  border: 2.5px solid #000;
+  border-radius: 12px;
+  box-shadow: 5px 5px 0 #000;
+  padding: 14px;
+  width: 256px;
+  font-family: 'Kalam', cursive;
+  pointer-events: auto;
+}
+
+.guide-detail-panel__symbol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #000;
+  color: #fff;
+  border-radius: 6px;
+  font-family: 'VT323', monospace;
+  font-size: 1.25rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.guide-dashed-rule {
+  border: none;
+  border-top: 2px dashed #000;
+  margin: 8px 0;
+}
+
+/* ── CLOSE BUTTON ─────────────────────────────── */
+.guide-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 24px;
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 4px;
+  box-shadow: 2px 2px 0 #000;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 900;
+  font-family: monospace;
+  line-height: 1;
+  padding: 0;
+  pointer-events: auto;
+}
+
+.guide-close-btn:hover {
+  background: #000;
+  color: #fff;
+}
+
+/* ── SPARKLE / STAR DECORATION ────────────────── */
+.guide-star {
+  display: inline-block;
+  font-size: 0.72rem;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ── RESPONSIVE ───────────────────────────────── */
+@media (max-width: 480px) {
+  .guide-anchor {
+    bottom: 12px;
+    right: 12px;
+  }
+  .guide-bubble {
+    max-width: 175px;
+    font-size: 0.74rem;
+  }
+  .guide-gate-card {
+    width: 68px;
+    /* Pull cards closer in on mobile so none fly off-screen.
+       JS translateX values are capped by this max-left-offset. */
+    left: auto !important;
+  }
+  /* Compact the card positions on small screens to keep within viewport */
+  .guide-gate-card[data-mobile-clamp] {
+    transform: scale(0.85) !important;
+  }
+}

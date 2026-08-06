@@ -74,8 +74,8 @@ const StateVisualization = ({ stateVector, targetVector, measurementOutcome = nu
           return (
             <div
               key={index}
-              className={`flex flex-col items-center w-1/5 h-full relative transition-opacity duration-500 ${
-                isCollapsedAway ? 'animate-bar-collapse-fade' : ''
+              className={`flex flex-col items-center w-1/5 h-full relative ${
+                isCollapsedAway ? 'opacity-15 transition-opacity duration-500' : 'transition-opacity duration-500'
               }`}
             >
               {/* Target Indicator (Game Mode Only) - Using pattern for black/white theme */}

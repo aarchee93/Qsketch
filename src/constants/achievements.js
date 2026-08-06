@@ -10,14 +10,14 @@ export const ACHIEVEMENTS = {
     name: '👣 First Step',
     description: 'Complete your first level',
     icon: '👣',
-    color: 'bg-blue-100',
+    color: 'bg-white',
   },
   LEVEL_COMPLETE_2: {
     id: 'level_complete_2',
     name: '🎯 Two Down',
     description: 'Complete 2 levels',
     icon: '🎯',
-    color: 'bg-green-100',
+    color: 'bg-white',
   },
 
   // Skill Achievements
@@ -26,14 +26,14 @@ export const ACHIEVEMENTS = {
     name: '🌊 Superposition Master',
     description: 'Complete all superposition levels',
     icon: '🌊',
-    color: 'bg-cyan-100',
+    color: 'bg-white',
   },
   ENTANGLEMENT_EXPERT: {
     id: 'entanglement_expert',
     name: '🔗 Entanglement Expert',
     description: 'Complete all entanglement levels',
     icon: '🔗',
-    color: 'bg-purple-100',
+    color: 'bg-white',
   },
 
   // Performance Achievements
@@ -42,21 +42,21 @@ export const ACHIEVEMENTS = {
     name: '⚡ Speed Runner',
     description: 'Complete any level in less than 2 minutes',
     icon: '⚡',
-    color: 'bg-yellow-100',
+    color: 'bg-white',
   },
   PERFECT_SCORE: {
     id: 'perfect_score',
     name: '💯 Perfect Score',
     description: 'Complete a level without using Undo',
     icon: '💯',
-    color: 'bg-red-100',
+    color: 'bg-white',
   },
   EFFICIENT_CIRCUIT: {
     id: 'efficient_circuit',
     name: '🎪 Efficient Circuit',
     description: 'Complete a level using exactly half or fewer moves than the limit',
     icon: '🎪',
-    color: 'bg-orange-100',
+    color: 'bg-white',
   },
 
   // Milestone Achievements
@@ -65,14 +65,14 @@ export const ACHIEVEMENTS = {
     name: '🏔️ Halfway There',
     description: 'Complete 5 levels',
     icon: '🏔️',
-    color: 'bg-indigo-100',
+    color: 'bg-white',
   },
   QUANTUM_GURU: {
     id: 'quantum_guru',
     name: '🧙 Quantum Guru',
     description: 'Complete all 11 levels - You are a quantum master!',
     icon: '🧙',
-    color: 'bg-pink-100',
+    color: 'bg-white',
   },
 
   // Challenge Achievements
@@ -81,14 +81,14 @@ export const ACHIEVEMENTS = {
     name: '🎭 No Mistakes',
     description: 'Complete 3 consecutive levels without using Undo',
     icon: '🎭',
-    color: 'bg-rose-100',
+    color: 'bg-white',
   },
   EXPERT_CHALLENGER: {
     id: 'expert_challenger',
     name: '👑 Expert Challenger',
     description: 'Complete all Expert difficulty levels',
     icon: '👑',
-    color: 'bg-amber-100',
+    color: 'bg-white',
   },
 };
 
@@ -106,7 +106,8 @@ export const checkAchievements = (
   movesUsed,
   moveLimit,
   usedUndo,
-  completedLevels
+  completedLevels,
+  timeSpent = null
 ) => {
   const unlockedAchievements = [];
 
@@ -158,8 +159,10 @@ export const checkAchievements = (
     unlockedAchievements.push(ACHIEVEMENTS.EFFICIENT_CIRCUIT.id);
   }
 
-  // Speed runner (complete in less than 2 minutes) - tracked separately
-  // Speedrunner is set when level time < 120 seconds
+  // Speed runner — complete in less than 2 minutes (timeSpent in seconds)
+  if (typeof timeSpent === 'number' && timeSpent < 120) {
+    unlockedAchievements.push(ACHIEVEMENTS.SPEEDRUNNER.id);
+  }
 
   return unlockedAchievements;
 };

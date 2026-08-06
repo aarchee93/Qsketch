@@ -6,15 +6,16 @@ const AchievementBadge = ({ achievement, unlocked }) => {
     <div
       className={`
         p-4 rounded-lg border-2 border-black text-center transition-all duration-300
-        ${unlocked 
-          ? 'bg-white shadow-lg animate-badge-pop' 
-          : 'bg-gray-200 opacity-50 grayscale'}
+        ${unlocked
+          ? 'bg-white shadow-[3px_3px_0_0_#000] animate-badge-pop'
+          : 'bg-white opacity-40 border-dashed'}
       `}
       title={achievement.description}
     >
-      <div className="text-4xl mb-2">{achievement.icon}</div>
+      <div className={`text-4xl mb-2 ${unlocked ? '' : 'grayscale'}`}>{achievement.icon}</div>
       <h4 className="font-bold text-sm">{achievement.name}</h4>
       <p className="text-xs mt-1 italic">{achievement.description}</p>
+      {!unlocked && <p className="text-xs mt-1 font-bold opacity-50">Locked</p>}
     </div>
   );
 };

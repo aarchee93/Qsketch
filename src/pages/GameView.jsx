@@ -1,12 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import SketchButton from '../components/SketchButton';
 import StateVisualization from '../components/StateVisualization';
 import GatesPanel from '../components/GatesPanel';
 import CircuitDisplay from '../components/CircuitDisplay';
 import CircuitDiagram from '../components/CircuitDiagram';
-import { AchievementUnlock } from '../components/AchievementBadge';
+import { AchievementUnlock, AchievementsGrid } from '../components/AchievementBadge';
 import { Confetti } from '../components/Loading';
-import { useToast, ToastContainer } from '../components/Toast';
 import LabConsole from '../components/LabConsole';
 import IdleQubit from '../components/IdleQubit';
 import DidYouKnow from '../components/DidYouKnow';
@@ -16,10 +15,10 @@ import { useLabConsole } from '../hooks/useLabConsole';
 import { PAGES } from '../constants/pages';
 import { GAME_ONBOARDING_STEPS } from '../constants/onboardingSteps';
 import { hasSeenOnboarding, markOnboardingSeen } from '../utils/sessionFlags';
-import { INITIAL_STATE, H0, H1, X0, X1, CNOT } from '../constants/quantumGates';
+import { INITIAL_STATE } from '../constants/quantumGates';
 import { LEVELS } from '../constants/gameLevels';
 import { safeApplyGate, safeIsTargetReached } from '../utils/quantumUtilsEnhanced';
-import { ACHIEVEMENTS, checkAchievements } from '../constants/achievements';
+import { ACHIEVEMENTS, checkAchievements, getAchievementsWithStatus } from '../constants/achievements';
 import { playSuccessSound, playAchievementSound, playErrorSound } from '../utils/soundUtils';
 import {
   initializeGameProgress,
@@ -28,19 +27,26 @@ import {
   getAchievements,
   getLevelBestStats,
 } from '../utils/gameProgressUtils';
+import { useToast, ToastContainer } from '../components/Toast';
 
-const GameView = ({ setPage }) => {
+// Total achievement count for the badge counter denominator
+const TOTAL_ACHIEVEMENTS = Object.keys(ACHIEVEMENTS).length;
+
+const GameView = ({ setPage, onGameStateChange, onViewLesson }) => {
     const { toasts, showToast, removeToast } = useToast();
     const [level, setLevel] = useState(0);
     const [circuit, setCircuit] = useState([]);
     const [history, setHistory] = useState([INITIAL_STATE]);
     const [gameStatus, setGameStatus] = useState('playing');
     const [moves, setMoves] = useState(0);
-    const [startTime] = useState(Date.now());
+    const startTimeRef = useRef(Date.now());
     const [usedUndo, setUsedUndo] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
     const [unlockedAchievement, setUnlockedAchievement] = useState(null);
     const [completedLevels, setCompletedLevels] = useState([]);
+    const [showAchievements, setShowAchievements] = useState(false);
+    // Feature #8: live badge counter — re-read from storage when achievements change
+    const [badgeCount, setBadgeCount] = useState(() => getAchievements().length);
     const consoleEntries = useLabConsole(circuit, null);
     const [showOnboarding, setShowOnboarding] = useState(!hasSeenOnboarding('game'));
 
@@ -55,10 +61,15 @@ const GameView = ({ setPage }) => {
         setCompletedLevels(progress.completedLevels);
     }, []);
 
-    const currentLevel = LEVELS[level];
+    const currentLevel = LEVELS[level] ?? LEVELS[0]; // fallback keeps hooks stable
     const currentState = history[history.length - 1];
     const levelBestStats = getLevelBestStats(level);
     const difficulty = currentLevel.difficulty;
+
+    // Lift game state up to App so QuantumGuide can react to challenge progress
+    useEffect(() => {
+        onGameStateChange?.({ gameStatus, circuit, level });
+    }, [gameStatus, circuit, level]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         try {
@@ -74,7 +85,7 @@ const GameView = ({ setPage }) => {
                     setGameStatus('won');
                     setShowConfetti(true);
 
-                    const timeSpent = Math.round((Date.now() - startTime) / 1000);
+                    const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
                     saveLevelCompletion(level, moves, timeSpent, usedUndo);
 
                     const newCompletedLevels = [...completedLevels, level];
@@ -83,7 +94,8 @@ const GameView = ({ setPage }) => {
                       moves,
                       currentLevel.maxMoves,
                       usedUndo,
-                      newCompletedLevels
+                      newCompletedLevels,
+                      timeSpent
                     );
 
                     const unlockedIds = getAchievements();
@@ -96,6 +108,8 @@ const GameView = ({ setPage }) => {
                       const achievement = Object.values(ACHIEVEMENTS).find(a => a.id === actualNewAchievements[0]);
                       setUnlockedAchievement(achievement);
                       playAchievementSound();
+                      // Update live badge counter
+                      setBadgeCount(getAchievements().length);
                     } else {
                       playSuccessSound();
                     }
@@ -117,7 +131,7 @@ const GameView = ({ setPage }) => {
             console.error('Error in win/loss check:', error);
             showToast('An error occurred. Please try again.', 'error');
         }
-    }, [currentState, currentLevel, moves, gameStatus, startTime, usedUndo, completedLevels, level, showToast]);
+    }, [currentState, currentLevel, moves, gameStatus, usedUndo, completedLevels, level, showToast]);
 
     const applyNewGate = useCallback((gateName, matrix) => {
         try {
@@ -146,6 +160,9 @@ const GameView = ({ setPage }) => {
         setMoves(0);
         setGameStatus('playing');
         setShowConfetti(false);
+        setUnlockedAchievement(null);
+        setUsedUndo(false);
+        startTimeRef.current = Date.now(); // reset per-attempt timer
     }, []);
 
     const handleUndo = useCallback(() => {
@@ -162,6 +179,9 @@ const GameView = ({ setPage }) => {
         if (level < LEVELS.length - 1) {
             setLevel(prev => prev + 1);
             setShowConfetti(false);
+            setUnlockedAchievement(null);
+            setUsedUndo(false);
+            startTimeRef.current = Date.now();
             handleReset();
         } else {
             showToast('🎊 You completed all levels! Amazing!', 'success');
@@ -189,8 +209,21 @@ const GameView = ({ setPage }) => {
             
             <section className="bg-white p-6 md:p-8 border-4 border-solid border-black rounded-xl shadow-[8px_8px_0_0_#000000]">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
-                    <h2 className="text-3xl font-extrabold text-center md:text-left">🎮 Quantum Puzzle Solver</h2>
-                    <IdleQubit activityKey={`${circuit.length}-${gameStatus}`} />
+                    <h2 className="text-3xl font-extrabold text-center md:text-left">Quantum Puzzle Solver</h2>
+                    <div className="flex items-center gap-3">
+                      <IdleQubit activityKey={`${circuit.length}-${gameStatus}`} />
+                      {/* Feature #8: live badge counter */}
+                      <button
+                        onClick={() => setShowAchievements(true)}
+                        className="flex items-center gap-1.5 border-2 border-black px-3 py-1 font-bold text-sm hover:bg-black hover:text-white transition-colors"
+                        aria-label={`View achievements — ${badgeCount} of ${TOTAL_ACHIEVEMENTS} unlocked`}
+                        title="View achievements"
+                      >
+                        <span aria-hidden="true">★</span>
+                        <AnimatedNumber value={badgeCount} duration={400} />
+                        <span className="font-normal opacity-60">/ {TOTAL_ACHIEVEMENTS}</span>
+                      </button>
+                    </div>
                 </div>
                 
                 <div className="mb-6 p-3 bg-white border-2 border-black rounded-lg">
@@ -209,7 +242,20 @@ const GameView = ({ setPage }) => {
                 </div>
 
                 <div className={`p-4 mb-6 border-2 border-black font-bold rounded-lg ${gameStatus === 'won' ? 'bg-white animate-bounce-in' : gameStatus === 'lost' ? 'bg-gray-200' : 'bg-white'}`}>
-                    <h3 className="text-2xl mb-2">📌 {currentLevel.name}</h3>
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <h3 className="text-2xl">📌 {currentLevel.name}</h3>
+                      {/* Feature #4: Learn-why deep-link to matching Resources lesson */}
+                      {currentLevel.lessonId && onViewLesson && (
+                        <button
+                          onClick={() => onViewLesson(currentLevel.lessonId)}
+                          className="shrink-0 text-xs font-bold border-2 border-black px-2 py-1 hover:bg-black hover:text-white transition-colors whitespace-nowrap"
+                          title="Read the lesson behind this level"
+                          aria-label="Read the related lesson in the Learning Centre"
+                        >
+                          📖 Learn why
+                        </button>
+                      )}
+                    </div>
                     <p className="text-sm italic mb-3">{currentLevel.description}</p>
                     {currentLevel.hint && (
                       <p className="text-xs bg-white border border-black p-2 rounded mb-3 font-mono">
@@ -291,12 +337,41 @@ const GameView = ({ setPage }) => {
               />
             )}
 
+            {/* Achievements Drawer — shows all badges, toggled via button */}
+            {showAchievements && (
+              <div
+                className="fixed inset-0 bg-black/40 z-40 flex items-end justify-center p-4"
+                onClick={() => setShowAchievements(false)}
+                role="presentation"
+              >
+                <div
+                  className="bg-white border-4 border-black rounded-xl p-6 w-full max-w-2xl max-h-[70vh] overflow-y-auto shadow-[8px_8px_0_0_#000] animate-bounce-in"
+                  onClick={e => e.stopPropagation()}
+                  role="dialog"
+                  aria-label="Achievements"
+                  aria-modal="true"
+                >
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-2xl font-extrabold">Achievements</h2>
+                    <button
+                      onClick={() => setShowAchievements(false)}
+                      className="border-2 border-black px-3 py-1 font-bold text-sm hover:bg-black hover:text-white transition-colors"
+                      aria-label="Close achievements"
+                    >✕</button>
+                  </div>
+                  <AchievementsGrid achievements={getAchievementsWithStatus(getAchievements())} />
+                </div>
+              </div>
+            )}
+
+            {/* Single ToastContainer for game-local toasts */}
             <ToastContainer toasts={toasts} onRemove={removeToast} />
 
             <OnboardingOverlay
                 open={showOnboarding}
                 onClose={closeOnboarding}
                 steps={GAME_ONBOARDING_STEPS}
+                character="referee"
             />
         </div>
     );

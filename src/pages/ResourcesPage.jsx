@@ -8,7 +8,9 @@ import {
   DIFFICULTY_STYLES,
   getYouTubeId,
   PATH_TO_LESSON_ID,
+  LESSON_GUIDED_CONFIG,
 } from "../constants/learningContent";
+import { isLessonComplete, markLessonComplete } from "../utils/resourceProgressUtils";
 
 const TABS = [
   { key: "learn", label: "Learn" },
@@ -24,30 +26,44 @@ const DifficultyBadge = ({ difficulty }) => (
   </span>
 );
 
-const ResourcesPage = ({ setPage }) => {
+const ResourcesPage = ({ setPage, deepLinkLessonId, onDeepLinkHandled, onTryInSimulator }) => {
   const [activeTab, setActiveTab] = useState("learn");
   const [expandedId, setExpandedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [highlightedLessonId, setHighlightedLessonId] = useState(null);
   const lessonRefs = useRef({});
 
+  // Wire up the deep-link from App (Simulator → Resources lesson jump).
+  // Sets the tab to "learn", expands the target lesson, and scrolls to it.
+  useEffect(() => {
+    if (deepLinkLessonId) {
+      setSearchQuery("");
+      setActiveTab("learn");
+      setExpandedId(deepLinkLessonId);
+      setHighlightedLessonId(deepLinkLessonId);
+      onDeepLinkHandled?.();
+    }
+  }, [deepLinkLessonId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const filteredContent = LEARNING_CONTENT[activeTab].filter(item => {
     const q = searchQuery.toLowerCase();
-    const jumpToLesson = (lessonId) => {
-  setSearchQuery("");
-  setActiveTab("learn");
-  setHighlightedLessonId(lessonId);
-  setExpandedId(lessonId); // add this line
-};
     const haystack = [item.title, item.term, item.description, item.definition, item.difficulty]
       .filter(Boolean).join(" ").toLowerCase();
     return haystack.includes(q);
   });
 
+  // Jumps to a lesson by ID: switches tab, expands, and scrolls.
   const jumpToLesson = (lessonId) => {
     setSearchQuery("");
     setActiveTab("learn");
+    setExpandedId(lessonId);
     setHighlightedLessonId(lessonId);
+  };
+
+  const toggleExpand = (itemId) => {
+    const next = expandedId === itemId ? null : itemId;
+    setExpandedId(next);
+    if (next) markLessonComplete(itemId);
   };
 
   useEffect(() => {
@@ -184,19 +200,25 @@ const ResourcesPage = ({ setPage }) => {
                   key={item.id}
                   ref={activeTab === "learn" ? (el) => (lessonRefs.current[item.id] = el) : null}
                   className={`border-2 border-black rounded-lg p-5 transition-all ${
-                    highlightedLessonId === item.id ? 'ring-4 ring-black bg-yellow-50' : ''
+                    highlightedLessonId === item.id ? 'border-4 border-black shadow-[4px_4px_0_0_#000]' : ''
                   }`}
                 >
                   <div className="flex justify-between items-center mb-4">
                     <DifficultyBadge difficulty={item.difficulty} />
                     <span className="text-sm text-gray-500">{item.readTime}</span>
                   </div>
-                  <h3 className="text-2xl font-bold mb-3">{item.title}</h3>
+                  <h3 className="text-2xl font-bold mb-3 flex items-center gap-2">
+                    {item.title}
+                    {activeTab === "learn" && isLessonComplete(item.id) && (
+                      <span title="Lesson read" className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-white border-2 border-black text-xs font-bold">✓</span>
+                    )}
+                  </h3>
 
                   {item.story ? (
   <>
     <button
-      onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
+      onClick={() => toggleExpand(item.id)}
+      aria-expanded={expandedId === item.id}
       className="text-sm font-bold underline hover:no-underline mb-4"
     >
       {expandedId === item.id ? '▲ Show less' : '▼ Read full lesson'}
@@ -242,7 +264,10 @@ const ResourcesPage = ({ setPage }) => {
                       </a>
                     )}
                     {activeTab === "learn" && (
-                      <SketchButton variant="outlined" onClick={() => setPage(PAGES.SIMULATOR)}>
+                      <SketchButton
+                        variant="outlined"
+                        onClick={() => onTryInSimulator?.(LESSON_GUIDED_CONFIG[item.id] ?? null)}
+                      >
                         Try in Simulator
                       </SketchButton>
                     )}

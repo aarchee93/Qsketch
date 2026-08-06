@@ -108,8 +108,12 @@ export const saveAchievements = (newAchievementIds) => {
   try {
     const existing = safeGetStorage(ACHIEVEMENTS_KEY, []);
     const allAchievements = Array.from(new Set([...existing, ...newAchievementIds]));
+    const trulyNew = newAchievementIds.filter((id) => !existing.includes(id));
 
     safeSetStorage(ACHIEVEMENTS_KEY, allAchievements);
+    if (trulyNew.length > 0) {
+      window.dispatchEvent(new CustomEvent('qsketch:achievement', { detail: { ids: trulyNew } }));
+    }
     return allAchievements;
   } catch (error) {
     console.error('Error saving achievements:', error);

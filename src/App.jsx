@@ -8,6 +8,7 @@ import { useConfirm } from './hooks/useConfirm';
 import { useToast, ToastContainer } from './components/Toast';
 import { playMeasureSound, playSuccessSound, playErrorSound, isMuted, setMuted } from './utils/soundUtils';
 import ConfirmModal from './components/ConfirmModal';
+import QuantumGuide from './components/QuantumGuide/QuantumGuide';
 import LandingPage from './pages/LandingPage';
 import CMSPage from './pages/CMSPage';
 import ResourcesPage from './pages/ResourcesPage';
@@ -43,6 +44,12 @@ const App = () => {
   const [measurementOutcome, setMeasurementOutcome] = useState(null);
   const [lastAction, setLastAction] = useState("START");
   const [resourceLessonId, setResourceLessonId] = useState(null);
+  const [guidedConfig, setGuidedConfig] = useState(null);
+
+  // Lifted game state so QuantumGuide can react during challenge mode
+  const [gameStatus, setGameStatus] = useState(null);
+  const [gameCircuit, setGameCircuit] = useState([]);
+  const [gameLevel, setGameLevel] = useState(0);
 
   // Animation-timing state: while these are set, the visible circuit/state
   // hasn't committed yet — the UI is mid gate-slide / collapse / reset, so the
@@ -61,6 +68,22 @@ const App = () => {
   // gate the assistant is currently explaining — closes the Simulator → Resources loop.
   const handleViewLesson = useCallback((lessonId) => {
     setResourceLessonId(lessonId);
+    setCurrentPage(PAGES.RESOURCES);
+  }, []);
+
+  // Opens the Simulator pre-loaded for one topic/gate: restricted toolbox,
+  // fresh |00⟩ state. config=null means the free-play simulator (no restriction).
+  const handleTryInSimulator = useCallback((config = null) => {
+    setCircuit([]);
+    setHistory([INITIAL_STATE]);
+    setMeasurementOutcome(null);
+    setLastAction("START");
+    setGuidedConfig(config);
+    setCurrentPage(PAGES.SIMULATOR);
+  }, []);
+
+  const handleExitGuided = useCallback(() => {
+    setGuidedConfig(null);
     setCurrentPage(PAGES.RESOURCES);
   }, []);
 
@@ -277,7 +300,17 @@ const App = () => {
   const renderPage = () => {
     switch (currentPage) {
       case PAGES.GAME:
-        return <GameView setPage={setCurrentPage} />;
+        return (
+          <GameView
+            setPage={setCurrentPage}
+            onViewLesson={handleViewLesson}
+            onGameStateChange={({ gameStatus, circuit: gameCircuit, level }) => {
+              setGameStatus(gameStatus);
+              setGameCircuit(gameCircuit);
+              setGameLevel(level);
+            }}
+          />
+        );
       case PAGES.SIMULATOR:
         return (
           <SimulatorView
@@ -295,6 +328,8 @@ const App = () => {
             pendingGate={pendingGate}
             isMeasuring={isMeasuring}
             isResetting={isResetting}
+            guidedConfig={guidedConfig}
+            onExitGuided={handleExitGuided}
           />
         );
       case PAGES.CMS:
@@ -310,6 +345,7 @@ const App = () => {
             setPage={setCurrentPage}
             deepLinkLessonId={resourceLessonId}
             onDeepLinkHandled={() => setResourceLessonId(null)}
+            onTryInSimulator={handleTryInSimulator}
           />
         );
       case PAGES.LANDING:
@@ -351,6 +387,17 @@ const App = () => {
 
       <ConfirmModal dialogState={dialogState} onConfirm={handleConfirm} onCancel={handleCancel} />
       <ToastContainer toasts={toasts} onRemove={removeToast} />
+      {(currentPage === PAGES.SIMULATOR || currentPage === PAGES.GAME) && (
+        <QuantumGuide
+          onTryInSimulator={handleTryInSimulator}
+          lastAction={lastAction}
+          circuit={currentPage === PAGES.GAME ? gameCircuit : circuit}
+          measurementOutcome={measurementOutcome}
+          gameStatus={currentPage === PAGES.GAME ? gameStatus : null}
+          gameLevel={currentPage === PAGES.GAME ? gameLevel : 0}
+          pageContext={currentPage === PAGES.GAME ? 'GAME' : 'SIMULATOR'}
+        />
+      )}
     </div>
   );
 };

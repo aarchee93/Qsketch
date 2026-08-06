@@ -165,17 +165,7 @@ export const LEARNING_PATH = [
   { id: 7, title: "Algorithms", summary: "Chaining gates into circuits to solve problems faster than classically possible." },
 ];
 
-export const BASIC_TERMS = [
-  { id: 1, term: "Qubit", definition: "The basic unit of quantum information; can represent 0, 1, or a superposition of both." },
-  { id: 2, term: "Quantum State", definition: "A complete description of a qubit's condition, written as a vector of amplitudes." },
-  { id: 3, term: "Ket Notation", definition: "The |0⟩ / |1⟩ style of writing quantum states, borrowed from Dirac notation." },
-  { id: 4, term: "Superposition", definition: "A state that is a combination of |0⟩ and |1⟩ until measured." },
-  { id: 5, term: "Entanglement", definition: "A correlation between qubits where measuring one instantly affects the other." },
-  { id: 6, term: "Hadamard", definition: "A gate that puts a qubit into an equal superposition of |0⟩ and |1⟩." },
-  { id: 7, term: "CNOT", definition: "A two-qubit gate that flips a target qubit only if the control qubit is |1⟩." },
-  { id: 8, term: "Measurement", definition: "The act of observing a qubit, collapsing it into a single classical value." },
-  { id: 9, term: "Bloch Sphere", definition: "A 3D sphere used to visualize a single qubit's state as a point on its surface." },
-];
+// BASIC_TERMS was unused — removed (audit LOW #32)
 
 export const GATE_TO_LESSON_ID = {
   H0: 2,
@@ -185,18 +175,100 @@ export const GATE_TO_LESSON_ID = {
   CNOT: 4,
 };
 
+// Dummy video links per gate — swap for real recordings post-submission.
+export const GATE_VIDEOS = {
+  H0: "#",
+  H1: "#",
+  X0: "#",
+  X1: "#",
+  CNOT: "#",
+};
+
+// Unified guided config — one source of truth for both the guide cards
+// (GATE_GUIDED_CONFIG) and ResourcesPage lessons (LESSON_GUIDED_CONFIG).
+// Each config now also carries a `steps` array for the GuidedStepper
+// component, which walks the user through the experiment one action at a time.
+export const GATE_GUIDED_CONFIG = {
+  H0: {
+    allowedGates: ["H0"],
+    instruction: "Click Hadamard (Q0) to create superposition.",
+    steps: [
+      {
+        instruction: "Click 'Hadamard (Q0)' in the gate panel on the left.",
+        expectAction: "H0",
+        observation: "Q0 is in superposition — the bars show 50% for |00⟩ and 50% for |10⟩.",
+      },
+    ],
+  },
+  H1: {
+    allowedGates: ["H1"],
+    instruction: "Click Hadamard (Q1) to create superposition.",
+    steps: [
+      {
+        instruction: "Click 'Hadamard (Q1)' to put Q1 into superposition.",
+        expectAction: "H1",
+        observation: "Q1 is in superposition — equal probability of |00⟩ and |01⟩.",
+      },
+    ],
+  },
+  X0: {
+    allowedGates: ["X0"],
+    instruction: "Click Pauli-X (Q0) to flip the qubit.",
+    steps: [
+      {
+        instruction: "Click 'Pauli-X (Q0)' to flip Q0 from |0⟩ to |1⟩.",
+        expectAction: "X0",
+        observation: "Q0 flipped — the bar moved from |00⟩ to |10⟩.",
+      },
+    ],
+  },
+  X1: {
+    allowedGates: ["X1"],
+    instruction: "Click Pauli-X (Q1) to flip the qubit.",
+    steps: [
+      {
+        instruction: "Click 'Pauli-X (Q1)' to flip Q1.",
+        expectAction: "X1",
+        observation: "Q1 flipped — the bar moved from |00⟩ to |01⟩.",
+      },
+    ],
+  },
+  CNOT: {
+    allowedGates: ["H0", "CNOT"],
+    instruction: "Click Hadamard (Q0), then CNOT, to entangle both qubits.",
+    steps: [
+      {
+        instruction: "Step 1 — Click 'Hadamard (Q0)' to put Q0 into superposition.",
+        expectAction: "H0",
+        observation: "Q0 is in superposition. Now the circuit is ready for entanglement.",
+      },
+      {
+        instruction: "Step 2 — Click 'CNOT (Q0 → Q1)' to entangle both qubits.",
+        expectAction: "CNOT",
+        observation: "The qubits are entangled! Only |00⟩ and |11⟩ have probability — they are perfectly correlated.",
+      },
+    ],
+  },
+};
+
+export const LESSON_GUIDED_CONFIG = {
+  2: GATE_GUIDED_CONFIG.H0,
+  3: { allowedGates: ["H0","X0"], instruction: "Try Hadamard, then Pauli-X, and compare the results." },
+  4: GATE_GUIDED_CONFIG.CNOT,
+};
+
 // Extracts a YouTube video ID from a standard watch URL, for thumbnail display
 export const getYouTubeId = (url) => {
   const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
   return match ? match[1] : null;
 };
 
-// Tailwind classes per difficulty level, used for badge coloring across all tabs
+// Tailwind classes per difficulty level — B&W sketch style, no colour
 export const DIFFICULTY_STYLES = {
-  Beginner: "bg-green-50 border-green-700 text-green-800",
-  Intermediate: "bg-amber-50 border-amber-700 text-amber-800",
-  Advanced: "bg-rose-50 border-rose-700 text-rose-800",
-  "All Levels": "bg-gray-100 border-gray-600 text-gray-700",
+  Beginner:     "bg-white border-black text-black",
+  Intermediate: "bg-white border-black text-black font-extrabold",
+  Advanced:     "bg-black border-black text-white",
+  "All Levels": "bg-white border-black text-black",
 };
 
 export const PATH_TO_LESSON_ID = {

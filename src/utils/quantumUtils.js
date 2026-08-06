@@ -34,16 +34,18 @@ export const isTargetReached = (current, target, tolerance = 1e-9) => {
  * @returns {{measuredState: number[], outcome: string}} - The collapsed state and the string representation.
  */
 export const measureState = (stateVector) => {
-    // 1. Calculate probabilities (squared magnitude of amplitudes)
     const probabilities = stateVector.map(amplitude => Math.pow(amplitude, 2));
 
-    // 2. Normalize (in case of floating point drift, sum should be 1)
+    // Guard: degenerate all-zero or NaN state — fall back to |00⟩
     const sumProb = probabilities.reduce((sum, p) => sum + p, 0);
+    if (!isFinite(sumProb) || sumProb < 1e-12) {
+        return { measuredState: [1, 0, 0, 0], outcome: '|00⟩' };
+    }
+
     const normalizedProbabilities = probabilities.map(p => p / sumProb);
 
-    // 3. Random selection based on probability
     const basisStates = ['|00⟩', '|01⟩', '|10⟩', '|11⟩'];
-    let randomValue = Math.random(); // A random float between 0 and 1
+    let randomValue = Math.random();
     let measuredIndex = -1;
 
     for (let i = 0; i < normalizedProbabilities.length; i++) {
@@ -53,19 +55,17 @@ export const measureState = (stateVector) => {
             break;
         }
     }
-    
-    // Fallback in case of tiny floating point errors
+
     if (measuredIndex === -1) {
         measuredIndex = normalizedProbabilities.length - 1;
     }
 
-    // 4. Create the collapsed state vector (1.0 at the measured index, 0 elsewhere)
     const collapsedState = new Array(4).fill(0);
     collapsedState[measuredIndex] = 1;
 
-    return { 
-        measuredState: collapsedState, 
-        outcome: basisStates[measuredIndex] 
+    return {
+        measuredState: collapsedState,
+        outcome: basisStates[measuredIndex]
     };
 };
 

@@ -37,7 +37,7 @@ const ConfirmModal = ({ dialogState, onConfirm, onCancel }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4 animate-fade-in"
+      className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4 animate-fade-in cursor-pointer"
       role="presentation"
       onClick={onCancel}
     >

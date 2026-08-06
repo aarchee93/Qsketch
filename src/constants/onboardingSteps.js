@@ -1,19 +1,23 @@
 export const SIMULATOR_ONBOARDING_STEPS = [
   {
-    title: 'Welcome to the Free Simulator',
-    body: "Two qubits start at |00⟩. Apply gates from the panel on the left and watch the state react in real time.",
+    title: 'Your first quantum experiment',
+    body: "We'll do one complete experiment together right now. It takes three actions. Follow the steps below — the guide will track your progress.",
   },
   {
-    title: 'Reading the probability chart',
-    body: "Each bar shows how likely a measurement is to land on that outcome. A solid black bar means a positive amplitude; an outlined bar with a − badge means a negative one — negative amplitudes are what cause interference.",
+    title: 'Step 1 — Create superposition',
+    body: "Click 'Hadamard (Q0)' in the gate panel on the left. Watch the probability bars change: Q0 now has a 50% chance of measuring 0 or 1.",
   },
   {
-    title: 'Circuit diagram & lab console',
-    body: "Your gates are drawn as an actual circuit below the chart, and the lab console ticks with a log of every action — like a real machine, not a static form.",
+    title: 'Step 2 — Notice the bars',
+    body: "The two bars for |00⟩ and |10⟩ are now equal. That means if you measured right now, the outcome would be completely random — unlike a classical bit, which always has a definite value.",
   },
   {
-    title: 'Measuring',
-    body: "Hit \"Measure Qubits\" to collapse the state into one classical outcome. Reset any time to start a fresh experiment.",
+    title: 'Step 3 — Measure',
+    body: "Click 'Perform Measurement'. The superposition collapses — all the probability snaps into one outcome. Run the experiment again (Reset) and it may land differently.",
+  },
+  {
+    title: "You've run a quantum experiment",
+    body: "That's the core loop: prepare a state → apply gates → measure. Everything else in QSketch is a variation on this. Try CNOT after Hadamard next — that creates entanglement.",
   },
 ];
 

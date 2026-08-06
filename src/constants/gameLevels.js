@@ -16,6 +16,7 @@ export const LEVELS = [
     {
         name: "Classical Flip",
         difficulty: DIFFICULTY.BEGINNER,
+        lessonId: 3, // Quantum Gates
         targetVector: [0, 0, 1, 0], 
         maxMoves: 3,
         description: "Your goal is to flip the first qubit (Q0) from |0> to |1>. Find the single gate that accomplishes this, using 3 moves or less.",
@@ -26,6 +27,7 @@ export const LEVELS = [
     {
         name: "Second Qubit Flip",
         difficulty: DIFFICULTY.BEGINNER,
+        lessonId: 3, // Quantum Gates
         targetVector: [0, 1, 0, 0], 
         maxMoves: 3,
         description: "Now flip the second qubit (Q1) from |0> to |1>. You'll need to apply the X gate to Q1 instead.",
@@ -38,6 +40,7 @@ export const LEVELS = [
     {
         name: "First Superposition",
         difficulty: DIFFICULTY.EASY,
+        lessonId: 2, // Superposition
         targetVector: [ONE_OVER_SQRT2, 0, ONE_OVER_SQRT2, 0],
         maxMoves: 2,
         description: "Create an equal superposition state on Qubit 0. The probability of measuring |0> or |1> should be 50%.",
@@ -48,6 +51,7 @@ export const LEVELS = [
     {
         name: "Second Superposition",
         difficulty: DIFFICULTY.EASY,
+        lessonId: 2, // Superposition
         targetVector: [ONE_OVER_SQRT2, ONE_OVER_SQRT2, 0, 0],
         maxMoves: 2,
         description: "Create superposition on Qubit 1. Both qubits |0> and |1> should have 50% probability.",
@@ -60,6 +64,7 @@ export const LEVELS = [
     {
         name: "Double Superposition",
         difficulty: DIFFICULTY.MEDIUM,
+        lessonId: 2, // Superposition
         targetVector: [0.5, 0.5, 0.5, 0.5],
         maxMoves: 3,
         description: "Create superposition on BOTH qubits. All four outcomes |00>, |01>, |10>, |11> should have equal 25% probability each.",
@@ -70,6 +75,7 @@ export const LEVELS = [
     {
         name: "Entangled Bell State",
         difficulty: DIFFICULTY.MEDIUM,
+        lessonId: 4, // Entanglement & CNOT
         targetVector: [ONE_OVER_SQRT2, 0, 0, ONE_OVER_SQRT2],
         maxMoves: 4,
         description: "Create the famous Bell State where the two qubits are perfectly correlated. Only the |00> and |11> outcomes should have probability.",
@@ -80,6 +86,7 @@ export const LEVELS = [
     {
         name: "The Anti-Bell State",
         difficulty: DIFFICULTY.MEDIUM,
+        lessonId: 4, // Entanglement & CNOT
         targetVector: [0, ONE_OVER_SQRT2, ONE_OVER_SQRT2, 0], 
         maxMoves: 5,
         description: "Create the Bell State where qubits are anti-correlated. If Q0 is |0>, Q1 must be |1>, and vice versa.",
@@ -92,21 +99,23 @@ export const LEVELS = [
     {
         name: "Flip After Superposition",
         difficulty: DIFFICULTY.HARD,
+        lessonId: 3, // Quantum Gates
         targetVector: [0, 0, ONE_OVER_SQRT2, ONE_OVER_SQRT2],
         maxMoves: 5,
         description: "Create superposition on Q0, then flip Q1. The final state should only show |10> and |11> outcomes with 50% each.",
         hint: "H0, then X1!",
         learningPoints: "Combine superposition and bit-flip operations.",
     },
-    // Level 9: Complex Entanglement
+    // Level 9: Superposition on Q0 only (|+0⟩ state)
     {
-        name: "Complex Entanglement",
+        name: "Superposition on Q0",
         difficulty: DIFFICULTY.HARD,
+        lessonId: 2, // Superposition
         targetVector: [ONE_OVER_SQRT2, 0, ONE_OVER_SQRT2, 0],
         maxMoves: 6,
-        description: "Create a state where measuring Q0 always gives the same result as measuring Q1. Q0 and Q1 are fully correlated!",
-        hint: "H0 creates superposition, but you need to correlate both qubits. Try H0 → CNOT!",
-        learningPoints: "Design quantum circuits for specific correlation patterns.",
+        description: "Create a superposition on Q0 while leaving Q1 in state |0⟩. Only |00⟩ and |10⟩ should have probability, each at 50%.",
+        hint: "A single Hadamard on Q0 is the key.",
+        learningPoints: "Hadamard on Q0 in a 2-qubit system leaves Q1 unchanged.",
     },
 
     // ========== EXPERT (Levels 10-11) ==========
@@ -114,6 +123,7 @@ export const LEVELS = [
     {
         name: "Quantum XOR Puzzle",
         difficulty: DIFFICULTY.EXPERT,
+        lessonId: 7, // Interference & Negative Amplitudes
         targetVector: [ONE_OVER_SQRT2, ONE_OVER_SQRT2, ONE_OVER_SQRT2, -ONE_OVER_SQRT2],
         maxMoves: 7,
         description: "Create a complex state with interference: |00> + |01> + |10> - |11>. This demonstrates quantum interference!",
@@ -124,6 +134,7 @@ export const LEVELS = [
     {
         name: "Master Quantum Designer",
         difficulty: DIFFICULTY.EXPERT,
+        lessonId: 4, // Entanglement & CNOT
         targetVector: [ONE_OVER_SQRT2, 0, 0, ONE_OVER_SQRT2],
         maxMoves: 8,
         description: "Return to the Bell State, but with only 8 moves. By now you know all the gates - prove you're a quantum master!",

@@ -42,18 +42,6 @@
   }
 }
 
-@keyframes glow-spin {
-  0% {
-    box-shadow: 0 0 10px 0 rgba(59, 130, 246, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 20px 5px rgba(59, 130, 246, 0.8);
-  }
-  100% {
-    box-shadow: 0 0 10px 0 rgba(59, 130, 246, 0.5);
-  }
-}
-
 /* Bar animations */
 @keyframes bar-grow {
   0% {
@@ -334,21 +322,7 @@
   animation: fade-in 0.3s ease-in;
 }
 
-/* Hover effects */
-.hover-scale-110:hover {
-  transform: scale(1.1);
-  transition: transform 0.2s ease-out;
-}
-
-.hover-shadow:hover {
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-  transition: box-shadow 0.2s ease-out;
-}
-
-.group:hover .group-hover\:glow {
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
-  transition: box-shadow 0.2s ease-out;
-}
+/* Hover effects — intentionally removed dead utilities (audit #1.16/2.9) */
 
 /* ===== Q-SKETCH LANDING PAGE ===== */
 .qsketch-landing { position: relative; color: #090909; background: #fff; isolation: isolate; font-family: 'Kalam', 'Comic Sans MS', cursive; }
@@ -386,6 +360,8 @@
 .qsketch-landing { scroll-behavior: smooth; }
 .hero-action { margin-top: 22px; border: 2px solid #111; background: #111; color: #fff; padding: 13px 20px; font: 800 1rem 'Inter', ui-sans-serif, sans-serif; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease; }
 .hero-action:hover { background: #fff; color: #111; transform: translate(-3px, -3px); box-shadow: 5px 5px 0 #111; }
+.hero-subaction { display: block; margin-top: 14px; background: none; border: none; padding: 0; font: 700 .9rem 'Inter', ui-sans-serif, sans-serif; text-decoration: underline; cursor: pointer; color: #111; }
+.hero-subaction:hover { text-decoration: none; }
 .hero-action:focus-visible,.demo-gate:focus-visible,.measure-button:focus-visible,.launch-button:focus-visible,.module-card:focus-visible { outline: 3px solid #111; outline-offset: 4px; }
 .demo-steps { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
 .demo-step-pill { display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid #111; background: #fff; color: #111; padding: 7px 13px; font: 700 0.88rem 'Inter', ui-sans-serif, sans-serif; transition: all 0.2s ease; }

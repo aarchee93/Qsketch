@@ -13,11 +13,15 @@ const GatesPanel = ({
   canUndo = false,
   resetLabel = "Reset Experiment",
   extraButton = null,
-}) => (
+  allowedGates = null, // null/undefined = all gates; array = restrict toolbox (guided mode)
+}) => {
+  const isAllowed = (gateId) => !allowedGates || allowedGates.includes(gateId);
+  return (
   <div className="relative flex flex-col space-y-4 p-4 border-2 border-black bg-white rounded-lg shadow-xl" role="group" aria-label={title}>
     <CornerDoodle position="top-right" variant="star" />
     <h3 className="text-xl font-extrabold text-center border-b-2 border-dashed border-black pb-2">{title}</h3>
     <div className="grid grid-cols-2 gap-4">
+      {isAllowed('H0') && (
       <SketchButton
         title={GATE_INFO.H0}
         aria-label="Apply Hadamard gate to Q0, creates superposition"
@@ -27,6 +31,8 @@ const GatesPanel = ({
         Hadamard (Q0)
         <span className="block text-xs font-normal">Superposition</span>
       </SketchButton>
+      )}
+      {isAllowed('H1') && (
       <SketchButton
         title={GATE_INFO.H1}
         aria-label="Apply Hadamard gate to Q1, creates superposition"
@@ -36,6 +42,8 @@ const GatesPanel = ({
         Hadamard (Q1)
         <span className="block text-xs font-normal">Superposition</span>
       </SketchButton>
+      )}
+      {isAllowed('X0') && (
       <SketchButton
         title={GATE_INFO.X0}
         aria-label="Apply Pauli-X gate to Q0, flips the qubit"
@@ -45,16 +53,19 @@ const GatesPanel = ({
         Pauli-X (Q0)
         <span className="block text-xs font-normal">Flips Qubit</span>
       </SketchButton>
+      )}
+      {isAllowed('X1') && (
       <SketchButton
         title={GATE_INFO.X1}
         aria-label="Apply Pauli-X gate to Q1, flips the qubit"
         onClick={() => applyNewGate('X1', X1)}
         disabled={disabled}
-        variant="inverted"
       >
         Pauli-X (Q1)
         <span className="block text-xs font-normal">Flips Qubit</span>
       </SketchButton>
+      )}
+      {isAllowed('CNOT') && (
       <SketchButton
         title={GATE_INFO.CNOT}
         aria-label="Apply CNOT gate, control Q0 target Q1, creates entanglement"
@@ -64,6 +75,7 @@ const GatesPanel = ({
         CNOT (Q0 → Q1)
         <span className="block text-xs font-normal">Entanglement</span>
       </SketchButton>
+      )}
     </div>
 
     {handleMeasure && (
@@ -71,7 +83,7 @@ const GatesPanel = ({
         onClick={handleMeasure}
         disabled={disabled}
         variant="inverted"
-        className="font-extrabold text-lg"
+        className="font-extrabold text-lg hover:bg-white hover:text-black"
         aria-label="Perform measurement, collapses the quantum state"
       >
         Perform Measurement <span aria-hidden="true">🤯</span>
@@ -93,6 +105,7 @@ const GatesPanel = ({
       Shortcuts: H · X · C · M · R
     </p>
   </div>
-);
+  );
+};
 
 export default GatesPanel;
