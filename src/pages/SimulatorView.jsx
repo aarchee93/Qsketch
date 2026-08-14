@@ -1,5 +1,7 @@
 import { useState, useMemo } from 'react';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import SketchButton from '../components/SketchButton';
+import ModeToggle from '../components/ModeToggle';
 import StateVisualization from '../components/StateVisualization';
 import GatesPanel from '../components/GatesPanel';
 import CircuitDisplay from '../components/CircuitDisplay';
@@ -50,7 +52,6 @@ const describeStateTitle = (stateVector, measurementOutcome) => {
 /* ────────────────────────────────────────────────────────────── */
 
 const SimulatorView = ({
-  setPage,
   circuit,
   applyNewGate,
   handleReset,
@@ -67,12 +68,43 @@ const SimulatorView = ({
   onExitGuided,
   onViewLesson,
 }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Initialize mode from URL query param or storage
+  const [mode, setMode] = useState(() => {
+    const urlMode = searchParams.get('mode');
+    if (urlMode === 'free' || urlMode === 'guided') return urlMode;
+    // Default to 'guided' mode
+    return 'guided';
+  });
+  const [showLearningAssistant, setShowLearningAssistant] = useState(mode === 'guided');
+  
   const consoleEntries = useLabConsole(circuit, measurementOutcome);
   const [showOnboarding, setShowOnboarding] = useState(!hasSeenOnboarding('simulator'));
 
   const closeOnboarding = () => {
     markOnboardingSeen('simulator');
     setShowOnboarding(false);
+  };
+  
+  // Handle mode change
+  const handleModeChange = (newMode) => {
+    setMode(newMode);
+    setSearchParams({ mode: newMode }, { replace: true });
+    
+    if (newMode === 'guided') {
+      // Switching to guided: show learning assistant
+      setShowLearningAssistant(true);
+    } else if (newMode === 'free') {
+      // Switching to free: collapse learning assistant
+      setShowLearningAssistant(false);
+      // Exit guided if active
+      if (guidedConfig) {
+        onExitGuided?.();
+      }
+    }
   };
 
   const isBusy     = !!pendingGate || isMeasuring || isResetting;
@@ -95,9 +127,10 @@ const SimulatorView = ({
     <div className="p-4 md:p-8">
       {/* Top nav */}
       <div className="flex items-center justify-between mb-8 gap-2">
-        <SketchButton onClick={() => setPage(PAGES.LANDING)}>
-          &larr; Back to Home
+        <SketchButton onClick={() => navigate(-1)}>
+          &larr; Back
         </SketchButton>
+        <ModeToggle mode={mode} onChange={handleModeChange} />
         <SketchButton
           onClick={() => setShowOnboarding(true)}
           variant="outlined"
@@ -110,41 +143,51 @@ const SimulatorView = ({
 
       <DidYouKnow />
 
-      <section className="bg-white p-6 md:p-8 border-4 border-solid border-black rounded-xl overflow-x-hidden shadow-[8px_8px_0_0_#000000]">
+      <section className="bg-white p-6 md:p-8 border-4 border-solid border-black rounded-xl overflow-visible shadow-[8px_8px_0_0_#000000]">
         {/* Section header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-6">
-          <h2 className="text-3xl font-extrabold text-center md:text-left">
-            {guidedConfig ? 'Guided Practice' : 'The 2-Qubit Free Simulator'}
-          </h2>
+          <div>
+            <h2 className="text-3xl font-extrabold text-center md:text-left">
+              {mode === 'guided' && guidedConfig ? 'Guided Practice' : 'The 2-Qubit Free Simulator'}
+            </h2>
+            <p className="text-xs text-black/60 mt-1">
+              {mode === 'guided' ? '✓ Step-by-step guidance' : '✓ Full experimental freedom'}
+            </p>
+          </div>
           <IdleQubit activityKey={`${circuit.length}-${measurementOutcome}`} mode={qubitMode} />
         </div>
 
-        {/* Feature #2: GuidedStepper replaces the flat guided banner */}
-        {guidedConfig ? (
+        {/* Feature #2: GuidedStepper - only in guided mode */}
+        {mode === 'guided' && guidedConfig ? (
           <GuidedStepper
             steps={guidedConfig.steps}
             lastAction={lastAction}
             instruction={guidedConfig.instruction}
             onExit={onExitGuided}
           />
+        ) : mode === 'free' ? (
+          <p className="text-center text-black mb-6 italic">
+            Experiment freely by applying gates to the initial |00⟩ state. All gates are available.
+          </p>
         ) : (
           <p className="text-center text-black mb-6 italic">
             Experiment freely by applying gates to the initial |00⟩ state.
           </p>
         )}
 
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col lg:flex-row gap-6 overflow-visible">
 
           {/* Gates Panel */}
           <div className="lg:w-1/3">
             <GatesPanel
+              mode={mode}
               applyNewGate={applyNewGate}
               handleMeasure={handleMeasure}
               handleUndo={handleUndo}
               handleReset={handleReset}
               disabled={!!measurementOutcome || isBusy}
               canUndo={history.length > 1 && !isBusy}
-              allowedGates={guidedConfig?.allowedGates ?? null}
+              allowedGates={mode === 'guided' ? guidedConfig?.allowedGates ?? null : null}
             />
           </div>
 
@@ -185,12 +228,30 @@ const SimulatorView = ({
             {/* Feature #6: State Story Bar — conceptual progress breadcrumb */}
             <StateStoryBar circuit={circuit} measurementOutcome={measurementOutcome} />
 
-            {/* Quantum Learning Assistant */}
-            <QuantumLearningAssistant
-              action={lastAction}
-              seed={circuit.length}
-              onViewLesson={onViewLesson}
-            />
+            {/* Quantum Learning Assistant - collapsible in free mode */}
+            {mode === 'guided' ? (
+              <QuantumLearningAssistant
+                action={lastAction}
+                seed={circuit.length}
+                onViewLesson={onViewLesson}
+              />
+            ) : (
+              <div className="space-y-2">
+                <button
+                  onClick={() => setShowLearningAssistant(!showLearningAssistant)}
+                  className="w-full px-3 py-2 bg-black/5 border-2 border-black/20 rounded-lg font-semibold text-sm hover:bg-black hover:text-white transition-all"
+                >
+                  {showLearningAssistant ? '▼' : '▶'} Learning Tips {showLearningAssistant ? '(Hide)' : '(Show)'}
+                </button>
+                {showLearningAssistant && (
+                  <QuantumLearningAssistant
+                    action={lastAction}
+                    seed={circuit.length}
+                    onViewLesson={onViewLesson}
+                  />
+                )}
+              </div>
+            )}
 
             <ResearchNote>
               {RESEARCH_NOTES[lastAction] || RESEARCH_NOTES.START}

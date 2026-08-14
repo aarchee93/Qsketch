@@ -623,3 +623,273 @@
     @apply hidden;
   }
 }
+
+/* ===== QUANTUM AUTH PAGE ANIMATIONS ===== */
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes quantum-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.5;
+  }
+}
+
+@keyframes orbit {
+  from {
+    transform: rotate(0deg) translateX(40px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(40px) rotate(-360deg);
+  }
+}
+
+@keyframes field-drift {
+  0%, 100% {
+    transform: translate(-2%, -1%) scale(0.98);
+  }
+  50% {
+    transform: translate(1%, 1%) scale(1.02);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+/* Quantum Auth Container - Simple White/Black Theme */
+.quantum-auth-container {
+  min-height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+
+/* Animated quantum atmosphere */
+.quantum-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.quantum-auth-field {
+  position: absolute;
+  width: min(78vw, 920px);
+  height: auto;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #111;
+  opacity: 0.12;
+  animation: auth-field-float 16s ease-in-out infinite;
+}
+
+.quantum-auth-field .field-orbits {
+  stroke: currentColor;
+  stroke-width: 1.35;
+  opacity: 0.36;
+  transform-origin: 460px 460px;
+  animation: field-spin 38s linear infinite;
+}
+
+.quantum-auth-field .field-web {
+  stroke: currentColor;
+  stroke-width: 1.2;
+  opacity: 0.48;
+  transform-origin: 460px 460px;
+  animation: field-spin-reverse 44s linear infinite;
+}
+
+.quantum-auth-field .field-nodes {
+  fill: currentColor;
+  opacity: 0.52;
+  transform-origin: 460px 460px;
+  animation: field-breathe 5s ease-in-out infinite;
+}
+
+@keyframes field-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes field-spin-reverse {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes field-breathe {
+  50% {
+    opacity: 0.85;
+    transform: scale(1.045);
+  }
+}
+
+/* Auth content wrapper */
+.quantum-auth-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100vh;
+  padding: 2rem;
+}
+
+/* Quantum state indicator */
+.quantum-state-indicator {
+  position: relative;
+  width: 32px;
+  height: 32px;
+}
+
+.indicator-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #111;
+  border-radius: 50%;
+  animation: quantum-pulse 2s ease-in-out infinite;
+}
+
+.indicator-dot.dot-1 {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  animation-delay: 0s;
+}
+
+.indicator-dot.dot-2 {
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  animation-delay: 0.666s;
+}
+
+.indicator-dot.dot-3 {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  animation-delay: 1.333s;
+}
+
+/* Quantum grid overlay */
+.quantum-grid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+    linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+  background-size: 50px 50px;
+  opacity: 0.3;
+  animation: grid-shift 20s linear infinite;
+}
+
+@keyframes grid-shift {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 50px 50px;
+  }
+}
+
+/* Auth form smooth transitions */
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+/* Auth Page Specific Animations - Simple */
+@keyframes auth-field-float {
+  0% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    opacity: 0.1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.02) rotate(0.5deg);
+    opacity: 0.14;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    opacity: 0.1;
+  }
+}
+
+.quantum-auth-field .field-orbits {
+  animation: auth-orbit-spin 45s linear infinite;
+  transform-origin: 460px 460px;
+}
+
+.quantum-auth-field .field-web {
+  animation: auth-web-pulse 6s ease-in-out infinite;
+  transform-origin: 460px 460px;
+}
+
+@keyframes auth-orbit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes auth-web-pulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Profile Page Background Animations */
+.profile-card-animated {
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-card-animated::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: 
+    radial-gradient(circle at 20% 50%, #000 1px, transparent 1px),
+    radial-gradient(circle at 80% 80%, #000 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: drift 20s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes drift {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(40px, 40px);
+  }
+}
+
+.profile-card-animated > * {
+  position: relative;
+  z-index: 1;
+}

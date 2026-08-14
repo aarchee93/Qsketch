@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { PAGES } from '../constants/pages';
+import { useNavigate } from 'react-router-dom';
+import SketchButton from '../components/SketchButton';
 import { playClickSound, playActionSound, playMeasureSound, playSuccessSound, playErrorSound } from '../utils/soundUtils';
 
 const modules = [
-  ['01', 'Quantum Simulator', 'Start with one qubit. Add a gate. Watch the result change in real time.', PAGES.SIMULATOR],
-  ['02', 'Quantum Challenge', 'Build confidence by solving short visual puzzles, one idea at a time.', PAGES.GAME],
-  ['03', 'Learning Centre', 'Clear lessons for the moments when you want the why behind the visual.', PAGES.RESOURCES],
-  ['04', 'Concept Manager', 'Save the concepts you want to revisit as your understanding grows.', PAGES.CMS],
+  ['01', 'Quantum Simulator', 'Start with one qubit. Add a gate. Watch the result change in real time.', '/simulator'],
+  ['02', 'Quantum Challenge', 'Build confidence by solving short visual puzzles, one idea at a time.', '/game'],
+  ['03', 'Learning Centre', 'Clear lessons for the moments when you want the why behind the visual.', '/resources'],
+  ['04', 'Concept Manager', 'Save the concepts you want to revisit as your understanding grows.', '/cms'],
 ];
 
 const concepts = [
@@ -55,7 +56,8 @@ function QuantumField() {
   </svg>;
 }
 
-const LandingPage = ({ setPage }) => {
+const LandingPage = () => {
+  const navigate = useNavigate();
   const [demoStage, setDemoStage] = useState('start');
   const [selectedQuizOption, setSelectedQuizOption] = useState(null);
   const [scrollAnimationReady, setScrollAnimationReady] = useState(false);
@@ -95,6 +97,7 @@ const LandingPage = ({ setPage }) => {
   };
 
   const handleQuizSelect = (option) => {
+    playClickSound();
     setSelectedQuizOption(option);
     if (option.correct) {
       playSuccessSound();
@@ -120,7 +123,7 @@ const LandingPage = ({ setPage }) => {
         <h1 className="hero-title">Q-SKETCH</h1>
         <p className="hero-statement">Build, Visualize, and Understand<br />Quantum Computing.</p>
         <p className="hero-caption">Don&apos;t just read about quantum computing — experience it! No background needed, start with simple visual experiments.</p>
-        <button className="hero-action" onClick={() => { playClickSound(); document.getElementById('quick-demo')?.scrollIntoView({ behavior: 'smooth' }); }}>Try it in 30 seconds -&gt;</button>
+        <SketchButton onClick={() => { playClickSound(); document.getElementById('quick-demo')?.scrollIntoView({ behavior: 'smooth' }); }}>Try it in 30 seconds →</SketchButton>
         <a className="scroll-cue" href="#quantum-basics" onClick={() => playClickSound()}>Scroll to explore <span>↓</span></a>
       </section>
 
@@ -179,7 +182,7 @@ const LandingPage = ({ setPage }) => {
               </div>
             </div>
 
-            <button className="measure-button" onClick={measure} disabled={demoStage !== 'superposition'}>
+            <button className="measure-button" onClick={measure} disabled={demoStage !== 'superposition'} style={{ opacity: demoStage !== 'superposition' ? 0.5 : 1, cursor: demoStage !== 'superposition' ? 'not-allowed' : 'pointer' }}>
               {demoStage === 'measured' ? 'Measured as |1⟩' : 'Measure →'}
             </button>
 
@@ -213,7 +216,7 @@ const LandingPage = ({ setPage }) => {
 
       <section className="section-shell modules-section">
         <p className="eyebrow">04 / Keep exploring</p><h2>Choose your next small step.</h2>
-        <div className="module-grid">{modules.map(([number, title, description, page]) => <button key={title} className="module-card reveal-on-scroll" onClick={() => { playClickSound(); setPage(page); }}><span>{number}</span><div className="module-icon">{title === 'Quantum Simulator' ? '◌' : title === 'Quantum Challenge' ? '✦' : title === 'Learning Centre' ? '⌁' : '⊞'}</div><h3>{title}</h3><p>{description}</p><strong>Open module <i>→</i></strong></button>)}</div>
+        <div className="module-grid">{modules.map(([number, title, description, page]) => <button key={title} className="module-card reveal-on-scroll" onClick={() => { playClickSound(); navigate(page); }}><span>{number}</span><div className="module-icon">{title === 'Quantum Simulator' ? '◌' : title === 'Quantum Challenge' ? '✦' : title === 'Learning Centre' ? '⌁' : '⊞'}</div><h3>{title}</h3><p>{description}</p><strong>Open module <i>→</i></strong></button>)}</div>
       </section>
 
       <section className="section-shell concepts-section">
@@ -252,7 +255,7 @@ const LandingPage = ({ setPage }) => {
       <section className="final-cta section-shell">
         <p className="eyebrow">Your first line of quantum code is waiting</p>
         <h2>Ready to Build Your First Quantum Circuit?</h2>
-        <button className="launch-button" onClick={() => { playClickSound(); setPage(PAGES.SIMULATOR); }}>Launch Simulator <span>→</span></button>
+        <SketchButton onClick={() => { playClickSound(); navigate('/simulator'); }} className="text-lg py-3">Launch Simulator →</SketchButton>
       </section>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SketchButton from '../components/SketchButton';
 import ResearchNote from '../components/ResearchNote';
-import { PAGES } from '../constants/pages';
 import {
   LEARNING_CONTENT,
   LEARNING_PATH,
@@ -26,11 +26,13 @@ const DifficultyBadge = ({ difficulty }) => (
   </span>
 );
 
-const ResourcesPage = ({ setPage, deepLinkLessonId, onDeepLinkHandled, onTryInSimulator }) => {
+const ResourcesPage = ({ deepLinkLessonId, onDeepLinkHandled, onTryInSimulator }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("learn");
   const [expandedId, setExpandedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [highlightedLessonId, setHighlightedLessonId] = useState(null);
+  const [selectedDifficulty, setSelectedDifficulty] = useState("All");
   const lessonRefs = useRef({});
 
   // Wire up the deep-link from App (Simulator → Resources lesson jump).
@@ -39,6 +41,7 @@ const ResourcesPage = ({ setPage, deepLinkLessonId, onDeepLinkHandled, onTryInSi
     if (deepLinkLessonId) {
       setSearchQuery("");
       setActiveTab("learn");
+      setSelectedDifficulty("All");
       setExpandedId(deepLinkLessonId);
       setHighlightedLessonId(deepLinkLessonId);
       onDeepLinkHandled?.();
@@ -49,13 +52,18 @@ const ResourcesPage = ({ setPage, deepLinkLessonId, onDeepLinkHandled, onTryInSi
     const q = searchQuery.toLowerCase();
     const haystack = [item.title, item.term, item.description, item.definition, item.difficulty]
       .filter(Boolean).join(" ").toLowerCase();
-    return haystack.includes(q);
+    
+    const matchesSearch = haystack.includes(q);
+    const matchesDifficulty = selectedDifficulty === "All" || item.difficulty === selectedDifficulty;
+    
+    return matchesSearch && matchesDifficulty;
   });
 
   // Jumps to a lesson by ID: switches tab, expands, and scrolls.
   const jumpToLesson = (lessonId) => {
     setSearchQuery("");
     setActiveTab("learn");
+    setSelectedDifficulty("All");
     setExpandedId(lessonId);
     setHighlightedLessonId(lessonId);
   };
@@ -77,8 +85,8 @@ const ResourcesPage = ({ setPage, deepLinkLessonId, onDeepLinkHandled, onTryInSi
 
   return (
     <div className="p-4 md:p-8">
-      <SketchButton className="mb-8" onClick={() => setPage(PAGES.LANDING)}>
-        &larr; Back to Home
+      <SketchButton className="mb-8" onClick={() => navigate(-1)}>
+        &larr; Back
       </SketchButton>
 
       <div className="max-w-6xl mx-auto">
@@ -98,9 +106,33 @@ const ResourcesPage = ({ setPage, deepLinkLessonId, onDeepLinkHandled, onTryInSi
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search quantum concepts..."
-            className="w-full border-2 border-black rounded-lg p-3 shadow-md"
+            className="w-full border-2 border-black rounded-lg p-3 shadow-[4px_4px_0_0_#000000]"
           />
         </div>
+
+        {/* Difficulty Filter Pills */}
+        {activeTab === "learn" && (
+          <div className="mb-8">
+            <h4 className="text-sm font-bold text-gray-600 mb-3">Filter by difficulty:</h4>
+            <div className="flex flex-wrap gap-2">
+              {["All", "Beginner", "Intermediate", "Advanced"].map((difficulty) => (
+                <button
+                  key={difficulty}
+                  onClick={() => setSelectedDifficulty(difficulty)}
+                  className={`
+                    px-4 py-2 rounded-full border-2 font-bold text-sm transition-all
+                    ${selectedDifficulty === difficulty
+                      ? 'border-black bg-black text-white shadow-[4px_4px_0_0_#000000]'
+                      : 'border-black/30 bg-white text-black hover:border-black'
+                    }
+                  `}
+                >
+                  {difficulty}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <section className="mb-10">
           <h3 className="text-2xl font-bold mb-4">Learning Path</h3>
@@ -111,7 +143,7 @@ const ResourcesPage = ({ setPage, deepLinkLessonId, onDeepLinkHandled, onTryInSi
                 <button
                   onClick={() => jumpToLesson(PATH_TO_LESSON_ID[step.id])}
                   title={step.summary}
-                  className="flex items-center gap-2 border-2 border-black rounded-full px-4 py-2 font-semibold hover:bg-black hover:text-white transition"
+                  className="flex items-center gap-2 border-2 border-black rounded-full px-4 py-2 font-semibold bg-white text-black shadow-[4px_4px_0_0_#000000] hover:shadow-[2px_2px_0_0_#000000] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all duration-100"
                 >
                   <span className="flex items-center justify-center w-6 h-6 rounded-full bg-black text-white text-xs font-bold">
                     {i + 1}
