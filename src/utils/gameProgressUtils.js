@@ -1,33 +1,106 @@
 /**
  * Game Progress Storage Utilities
  * Saves and retrieves player progress, stats, and achievements
+ * Now uses Supabase for cloud storage with localStorage fallback
  */
 
 import { safeGetStorage, safeSetStorage } from './storageUtils';
+import { supabase } from './supabaseClient';
 
 const GAME_PROGRESS_KEY = 'qsketch_game_progress';
 const ACHIEVEMENTS_KEY = 'qsketch_achievements';
 
 /**
+ * Get current user ID from Supabase session
+ * @returns {string|null} User ID or null if not authenticated
+ */
+const getUserId = async () => {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user?.id ?? null;
+  } catch (err) {
+    console.error('Error getting user ID:', err);
+    return null;
+  }
+};
+
+/**
  * Initialize or get game progress
  */
-export const initializeGameProgress = () => {
-  const existing = safeGetStorage(GAME_PROGRESS_KEY, null);
+export const initializeGameProgress = async () => {
+  const userId = await getUserId();
 
-  if (existing && typeof existing === 'object') {
-    return existing;
+  // If not authenticated, use localStorage only
+  if (!userId) {
+    const existing = safeGetStorage(GAME_PROGRESS_KEY, null);
+    if (existing && typeof existing === 'object') {
+      return existing;
+    }
+
+    const newProgress = {
+      completedLevels: [],
+      levelStats: {},
+      totalGamesPlayed: 0,
+      totalMoveCount: 0,
+      startedAt: new Date().toISOString(),
+    };
+
+    safeSetStorage(GAME_PROGRESS_KEY, newProgress);
+    return newProgress;
   }
 
-  const newProgress = {
-    completedLevels: [],
-    levelStats: {},
-    totalGamesPlayed: 0,
-    totalMoveCount: 0,
-    startedAt: new Date().toISOString(),
-  };
+  // Try to fetch from Supabase
+  try {
+    const { data, error } = await supabase
+      .from('game_progress')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
 
-  safeSetStorage(GAME_PROGRESS_KEY, newProgress);
-  return newProgress;
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error fetching game progress:', error);
+    }
+
+    if (data) {
+      return JSON.parse(data.progress_data);
+    }
+
+    // Create new progress if doesn't exist
+    const newProgress = {
+      completedLevels: [],
+      levelStats: {},
+      totalGamesPlayed: 0,
+      totalMoveCount: 0,
+      startedAt: new Date().toISOString(),
+    };
+
+    await supabase.from('game_progress').insert({
+      user_id: userId,
+      progress_data: JSON.stringify(newProgress),
+    });
+
+    return newProgress;
+  } catch (err) {
+    console.error('Error initializing game progress:', err);
+    // Fallback to localStorage
+    const existing = safeGetStorage(GAME_PROGRESS_KEY, null);
+    if (existing && typeof existing === 'object') {
+      return existing;
+    }
+
+    const newProgress = {
+      completedLevels: [],
+      levelStats: {},
+      totalGamesPlayed: 0,
+      totalMoveCount: 0,
+      startedAt: new Date().toISOString(),
+    };
+
+    safeSetStorage(GAME_PROGRESS_KEY, newProgress);
+    return newProgress;
+  }
 };
 
 /**
@@ -37,9 +110,10 @@ export const initializeGameProgress = () => {
  * @param {number} timeSpent - Time spent in seconds
  * @param {boolean} usedUndo - Whether undo was used
  */
-export const saveLevelCompletion = (levelIndex, movesUsed, timeSpent, usedUndo) => {
+export const saveLevelCompletion = async (levelIndex, movesUsed, timeSpent, usedUndo) => {
   try {
-    const progress = safeGetStorage(GAME_PROGRESS_KEY, initializeGameProgress());
+    const userId = await getUserId();
+    const progress = await initializeGameProgress();
 
     // Mark level as completed
     if (!progress.completedLevels.includes(levelIndex)) {
@@ -62,7 +136,21 @@ export const saveLevelCompletion = (levelIndex, movesUsed, timeSpent, usedUndo) 
     progress.totalGamesPlayed += 1;
     progress.totalMoveCount += movesUsed;
 
+    // Save to localStorage
     safeSetStorage(GAME_PROGRESS_KEY, progress);
+
+    // Save to Supabase if authenticated
+    if (userId) {
+      const { error } = await supabase
+        .from('game_progress')
+        .update({ progress_data: JSON.stringify(progress) })
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('Error saving level completion to Supabase:', error);
+      }
+    }
+
     return progress;
   } catch (error) {
     console.error('Error saving level completion:', error);
@@ -74,9 +162,9 @@ export const saveLevelCompletion = (levelIndex, movesUsed, timeSpent, usedUndo) 
  * Get level best stats (best moves, fastest time)
  * @param {number} levelIndex - Level index
  */
-export const getLevelBestStats = (levelIndex) => {
+export const getLevelBestStats = async (levelIndex) => {
   try {
-    const progress = safeGetStorage(GAME_PROGRESS_KEY, initializeGameProgress());
+    const progress = await initializeGameProgress();
     const levelStats = progress.levelStats[levelIndex] || [];
 
     if (levelStats.length === 0) {
@@ -104,13 +192,34 @@ export const getLevelBestStats = (levelIndex) => {
  * Save achievements
  * @param {string[]} newAchievementIds - Array of achievement IDs
  */
-export const saveAchievements = (newAchievementIds) => {
+export const saveAchievements = async (newAchievementIds) => {
   try {
+    const userId = await getUserId();
     const existing = safeGetStorage(ACHIEVEMENTS_KEY, []);
     const allAchievements = Array.from(new Set([...existing, ...newAchievementIds]));
     const trulyNew = newAchievementIds.filter((id) => !existing.includes(id));
 
+    // Save to localStorage
     safeSetStorage(ACHIEVEMENTS_KEY, allAchievements);
+
+    // Save to Supabase if authenticated
+    if (userId) {
+      const { error } = await supabase
+        .from('user_achievements')
+        .upsert(
+          {
+            user_id: userId,
+            achievement_ids: allAchievements,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id' }
+        );
+
+      if (error) {
+        console.error('Error saving achievements to Supabase:', error);
+      }
+    }
+
     if (trulyNew.length > 0) {
       window.dispatchEvent(new CustomEvent('qsketch:achievement', { detail: { ids: trulyNew } }));
     }
@@ -145,9 +254,9 @@ export const isAchievementUnlocked = (achievementId) => {
 /**
  * Get game summary stats
  */
-export const getGameSummary = () => {
+export const getGameSummary = async () => {
   try {
-    const progress = safeGetStorage(GAME_PROGRESS_KEY, initializeGameProgress());
+    const progress = await initializeGameProgress();
     const achievements = getAchievements();
 
     return {
@@ -184,10 +293,41 @@ export const getGameSummary = () => {
 /**
  * Reset all progress (for testing or user request)
  */
-export const resetAllProgress = () => {
+export const resetAllProgress = async () => {
   try {
-    safeSetStorage(GAME_PROGRESS_KEY, initializeGameProgress());
+    const userId = await getUserId();
+
+    // Reset localStorage
+    safeSetStorage(GAME_PROGRESS_KEY, {
+      completedLevels: [],
+      levelStats: {},
+      totalGamesPlayed: 0,
+      totalMoveCount: 0,
+      startedAt: new Date().toISOString(),
+    });
     safeSetStorage(ACHIEVEMENTS_KEY, []);
+
+    // Reset in Supabase if authenticated
+    if (userId) {
+      await supabase
+        .from('game_progress')
+        .update({
+          progress_data: JSON.stringify({
+            completedLevels: [],
+            levelStats: {},
+            totalGamesPlayed: 0,
+            totalMoveCount: 0,
+            startedAt: new Date().toISOString(),
+          }),
+        })
+        .eq('user_id', userId);
+
+      await supabase
+        .from('user_achievements')
+        .update({ achievement_ids: [] })
+        .eq('user_id', userId);
+    }
+
     return true;
   } catch (error) {
     console.error('Error resetting progress:', error);
@@ -198,9 +338,9 @@ export const resetAllProgress = () => {
 /**
  * Export game progress as JSON (for backup)
  */
-export const exportGameProgress = () => {
+export const exportGameProgress = async () => {
   try {
-    const progress = safeGetStorage(GAME_PROGRESS_KEY, initializeGameProgress());
+    const progress = await initializeGameProgress();
     const achievements = getAchievements();
 
     return JSON.stringify(

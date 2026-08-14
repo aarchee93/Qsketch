@@ -1,6 +1,6 @@
+import { useNavigate } from 'react-router-dom';
 import SketchButton from '../components/SketchButton';
 import ConceptEditor from '../components/ConceptEditor';
-import { PAGES } from '../constants/pages';
 import { useState } from 'react';
 
 const COLOR_MAP = {
@@ -23,7 +23,8 @@ const renderFormattedText = (text) => {
     );
 };
 
-const CMSPage = ({ setPage, concepts, onAddConcept, onDeleteConcept }) => {
+const CMSPage = ({ concepts, onAddConcept, onDeleteConcept }) => {
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
 
   const filteredConcepts = query.trim()
@@ -35,7 +36,7 @@ const CMSPage = ({ setPage, concepts, onAddConcept, onDeleteConcept }) => {
 
   return (
     <div className="p-4 md:p-8">
-      <SketchButton className="mb-8" onClick={() => setPage(PAGES.LANDING)}>
+      <SketchButton className="mb-8" onClick={() => navigate('/')}>
         &larr; Back to Home
       </SketchButton>
       
@@ -61,7 +62,7 @@ const CMSPage = ({ setPage, concepts, onAddConcept, onDeleteConcept }) => {
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Search concepts..."
                     aria-label="Search concepts"
-                    className="p-2 border-2 border-black rounded shadow-md bg-white text-black text-sm"
+                    className="p-2 border-2 border-black rounded shadow-[4px_4px_0_0_#000000] bg-white text-black text-sm"
                 />
             )}
         </div>

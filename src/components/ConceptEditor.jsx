@@ -132,7 +132,7 @@ useEffect(() => {
                             setTitle(e.target.value);
                             setMessage("");
                         }}
-                        className="w-full p-2 border-2 border-black rounded shadow-md bg-white text-black"
+                        className="w-full p-2 border-2 border-black rounded shadow-[4px_4px_0_0_#000000] bg-white text-black"
                         required
                     />
                 </div>
@@ -149,7 +149,7 @@ useEffect(() => {
                             setSubTitle(e.target.value);
                             setMessage("");
                         }}
-                        className="w-full p-2 border-2 border-black rounded shadow-md bg-white text-black"
+                        className="w-full p-2 border-2 border-black rounded shadow-[4px_4px_0_0_#000000] bg-white text-black"
                     />
                 </div>
             </div>
@@ -167,7 +167,7 @@ useEffect(() => {
                         setMessage("");
                     }}
                     rows="4"
-                    className="w-full p-2 border-2 border-black rounded shadow-md bg-white text-black"
+                    className="w-full p-2 border-2 border-black rounded shadow-[4px_4px_0_0_#000000] bg-white text-black"
                     required
                 />
             </div>
@@ -182,7 +182,7 @@ useEffect(() => {
                         aria-label={`Set concept color to ${c.value.replace('-50', '')}`}
                         aria-pressed={color === c.value}
                         className={`w-7 h-7 rounded-full border-2 border-black ${c.swatch} ${
-                            color === c.value ? 'ring-2 ring-offset-1 ring-black' : ''
+                            color === c.value ? 'shadow-[3px_3px_0_0_#000000]' : ''
                         }`}
                     />
                 ))}

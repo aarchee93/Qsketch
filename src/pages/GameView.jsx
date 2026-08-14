@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SketchButton from '../components/SketchButton';
+import TierSelector from '../components/TierSelector';
 import StateVisualization from '../components/StateVisualization';
 import GatesPanel from '../components/GatesPanel';
 import CircuitDisplay from '../components/CircuitDisplay';
@@ -16,7 +18,7 @@ import { PAGES } from '../constants/pages';
 import { GAME_ONBOARDING_STEPS } from '../constants/onboardingSteps';
 import { hasSeenOnboarding, markOnboardingSeen } from '../utils/sessionFlags';
 import { INITIAL_STATE } from '../constants/quantumGates';
-import { LEVELS } from '../constants/gameLevels';
+import { LEVELS, TIER } from '../constants/gameLevels';
 import { safeApplyGate, safeIsTargetReached } from '../utils/quantumUtilsEnhanced';
 import { ACHIEVEMENTS, checkAchievements, getAchievementsWithStatus } from '../constants/achievements';
 import { playSuccessSound, playAchievementSound, playErrorSound } from '../utils/soundUtils';
@@ -32,8 +34,28 @@ import { useToast, ToastContainer } from '../components/Toast';
 // Total achievement count for the badge counter denominator
 const TOTAL_ACHIEVEMENTS = Object.keys(ACHIEVEMENTS).length;
 
-const GameView = ({ setPage, onGameStateChange, onViewLesson }) => {
+const GameView = ({ onGameStateChange, onViewLesson }) => {
+    const navigate = useNavigate();
     const { toasts, showToast, removeToast } = useToast();
+    
+    // Initialize tier from localStorage or default to tier_1
+    const [selectedTier, setSelectedTier] = useState(() => {
+      const saved = localStorage.getItem('game_selected_tier');
+      return saved || 'tier_1';
+    });
+    
+    const [tierSelected, setTierSelected] = useState(false);
+    
+    const handleTierSelect = (tier) => {
+      setSelectedTier(tier);
+      localStorage.setItem('game_selected_tier', tier);
+      setTierSelected(true);
+      setLevel(0); // Reset to first level of selected tier
+    };
+    
+    // Filter levels by selected tier
+    const tierLevels = LEVELS.filter(l => l.tier === selectedTier);
+    
     const [level, setLevel] = useState(0);
     const [circuit, setCircuit] = useState([]);
     const [history, setHistory] = useState([INITIAL_STATE]);
@@ -56,15 +78,20 @@ const GameView = ({ setPage, onGameStateChange, onViewLesson }) => {
     };
 
     useEffect(() => {
-        initializeGameProgress();
-        const progress = initializeGameProgress();
-        setCompletedLevels(progress.completedLevels);
+        initializeGameProgress().then(progress => {
+            setCompletedLevels(progress.completedLevels);
+        });
     }, []);
 
-    const currentLevel = LEVELS[level] ?? LEVELS[0]; // fallback keeps hooks stable
+    const currentLevel = tierLevels[level] ?? tierLevels[0]; // fallback keeps hooks stable
     const currentState = history[history.length - 1];
-    const levelBestStats = getLevelBestStats(level);
+    const [levelBestStats, setLevelBestStats] = useState({ completed: false, attempts: 0 });
     const difficulty = currentLevel.difficulty;
+
+    // Fetch level best stats when level changes
+    useEffect(() => {
+        getLevelBestStats(level).then(setLevelBestStats);
+    }, [level]);
 
     // Lift game state up to App so QuantumGuide can react to challenge progress
     useEffect(() => {
@@ -86,7 +113,11 @@ const GameView = ({ setPage, onGameStateChange, onViewLesson }) => {
                     setShowConfetti(true);
 
                     const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
-                    saveLevelCompletion(level, moves, timeSpent, usedUndo);
+                    
+                    // Save level completion asynchronously
+                    saveLevelCompletion(level, moves, timeSpent, usedUndo).catch(err => 
+                        console.error('Error saving level completion:', err)
+                    );
 
                     const newCompletedLevels = [...completedLevels, level];
                     const newAchievements = checkAchievements(
@@ -104,7 +135,9 @@ const GameView = ({ setPage, onGameStateChange, onViewLesson }) => {
                     );
 
                     if (actualNewAchievements.length > 0) {
-                      saveAchievements(actualNewAchievements);
+                      saveAchievements(actualNewAchievements).catch(err =>
+                        console.error('Error saving achievements:', err)
+                      );
                       const achievement = Object.values(ACHIEVEMENTS).find(a => a.id === actualNewAchievements[0]);
                       setUnlockedAchievement(achievement);
                       playAchievementSound();
@@ -176,7 +209,7 @@ const GameView = ({ setPage, onGameStateChange, onViewLesson }) => {
     }, [history.length, gameStatus, showToast]);
 
     const handleNextLevel = useCallback(() => {
-        if (level < LEVELS.length - 1) {
+        if (level < tierLevels.length - 1) {
             setLevel(prev => prev + 1);
             setShowConfetti(false);
             setUnlockedAchievement(null);
@@ -184,16 +217,35 @@ const GameView = ({ setPage, onGameStateChange, onViewLesson }) => {
             startTimeRef.current = Date.now();
             handleReset();
         } else {
-            showToast('🎊 You completed all levels! Amazing!', 'success');
-            setTimeout(() => setPage(PAGES.LANDING), 1000);
+            showToast('🎊 You completed this tier! Amazing!', 'success');
+            setTimeout(() => setTierSelected(false), 1500); // Go back to tier selector
         }
-    }, [level, showToast, setPage, handleReset]);
+    }, [level, tierLevels.length, showToast, handleReset]);
+
+    const progress = tierLevels.length > 0 ? ((level + 1) / tierLevels.length) * 100 : 0;
 
     return (
         <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-screen animate-fade-in">
+            {/* Tier Selector Screen */}
+            {!tierSelected ? (
+                <div className="min-h-screen flex items-center justify-center">
+                    <TierSelector 
+                        selectedTier={selectedTier} 
+                        onChange={handleTierSelect}
+                    />
+                    <SketchButton 
+                        onClick={() => setTierSelected(true)}
+                        className="fixed bottom-8 right-8 font-extrabold"
+                    >
+                        Start Tier {selectedTier.split('_')[1]} →
+                    </SketchButton>
+                </div>
+            ) : (
+            <>
+            {/* Gameplay Screen */}
             <div className="flex items-center justify-between mb-8 gap-2">
-                <SketchButton onClick={() => setPage(PAGES.LANDING)}>
-                    &larr; Back to Home
+                <SketchButton onClick={() => navigate(-1)}>
+                    &larr; Back
                 </SketchButton>
                 <SketchButton
                     onClick={() => setShowOnboarding(true)}
@@ -228,7 +280,7 @@ const GameView = ({ setPage, onGameStateChange, onViewLesson }) => {
                 
                 <div className="mb-6 p-3 bg-white border-2 border-black rounded-lg">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="font-bold">Progress: Level {level + 1} / {LEVELS.length}</span>
+                    <span className="font-bold">Progress: Level {level + 1} / {tierLevels.length}</span>
                     <span className="text-sm font-mono bg-black text-white px-2 py-1 rounded border border-black">
                       {difficulty.toUpperCase()}
                     </span>
@@ -236,7 +288,7 @@ const GameView = ({ setPage, onGameStateChange, onViewLesson }) => {
                   <div className="bg-white border-2 border-black h-4 rounded overflow-hidden">
                     <div
                       className="bg-black h-full transition-all duration-500"
-                      style={{ width: `${((level + 1) / LEVELS.length) * 100}%` }}
+                      style={{ width: `${progress}%` }}
                     />
                   </div>
                 </div>
@@ -299,7 +351,7 @@ const GameView = ({ setPage, onGameStateChange, onViewLesson }) => {
                             resetLabel="Reset Level"
                             extraButton={gameStatus === 'won' && (
     <SketchButton onClick={handleNextLevel} variant="inverted" className="font-extrabold animate-bounce-in">
-        {level < LEVELS.length - 1 ? 'Next Level →' : '🏆 Complete!'}
+        {level < tierLevels.length - 1 ? 'Next Level →' : '🏆 Complete Tier!'}
     </SketchButton>
 )}
                         />
@@ -373,6 +425,8 @@ const GameView = ({ setPage, onGameStateChange, onViewLesson }) => {
                 steps={GAME_ONBOARDING_STEPS}
                 character="referee"
             />
+            </>
+            )}
         </div>
     );
 };
