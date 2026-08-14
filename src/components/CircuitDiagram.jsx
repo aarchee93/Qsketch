@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { H0 as H0_MATRIX, CNOT as CNOT_MATRIX } from '../constants/quantumGates';
+import { H0 as H0_MATRIX, H1 as H1_MATRIX, X0 as X0_MATRIX, X1 as X1_MATRIX, CNOT as CNOT_MATRIX } from '../constants/quantumGates';
 
 // Renders the applied gates as an actual circuit diagram (two wires + gate
 // boxes). CNOT is drawn as a control dot connected by a vertical line to a
@@ -227,7 +227,13 @@ const CircuitDiagram = ({
 
   const handleShortcut = (gateName) => {
     if (!applyNewGate) return;
-    const matrices = { H0: H0_MATRIX, CNOT: CNOT_MATRIX };
+    const matrices = { 
+      H0: H0_MATRIX, 
+      H1: H1_MATRIX, 
+      X0: X0_MATRIX, 
+      X1: X1_MATRIX, 
+      CNOT: CNOT_MATRIX 
+    };
     const matrix = matrices[gateName];
     if (matrix) applyNewGate(gateName, matrix);
   };
