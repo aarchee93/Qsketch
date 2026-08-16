@@ -264,7 +264,6 @@ const AuthPage = ({ onAuthSuccess }) => {
           <button
             onClick={() => {
               playClickSound();
-              // Will be handled in App.jsx via props
               window.__guestMode = true;
               onAuthSuccess?.();
             }}

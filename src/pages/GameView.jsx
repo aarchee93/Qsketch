@@ -233,12 +233,6 @@ const GameView = ({ onGameStateChange, onViewLesson }) => {
                         selectedTier={selectedTier} 
                         onChange={handleTierSelect}
                     />
-                    <SketchButton 
-                        onClick={() => setTierSelected(true)}
-                        className="fixed bottom-8 right-8 font-extrabold"
-                    >
-                        Start Tier {selectedTier.split('_')[1]} →
-                    </SketchButton>
                 </div>
             ) : (
             <>
