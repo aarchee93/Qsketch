@@ -1,0 +1,43 @@
+<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer circle ring -->
+  <circle cx="40" cy="45" r="35" fill="none" stroke="black" stroke-width="2.5"/>
+  
+  <!-- Main head circle -->
+  <circle cx="40" cy="45" r="32" fill="white" stroke="black" stroke-width="2"/>
+  
+  <!-- Antenna pole -->
+  <rect x="38" y="10" width="4" height="22" fill="black" stroke="black" stroke-width="1"/>
+  
+  <!-- Antenna ball -->
+  <circle cx="40" cy="8" r="4.5" fill="white" stroke="black" stroke-width="1.5"/>
+  
+  <!-- Motion lines around antenna -->
+  <path d="M 32 18 Q 30 15 28 17" stroke="black" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.7"/>
+  <path d="M 48 18 Q 50 15 52 17" stroke="black" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.7"/>
+  
+  <!-- Left ear -->
+  <circle cx="18" cy="35" r="4" fill="none" stroke="black" stroke-width="1.8"/>
+  
+  <!-- Right ear -->
+  <circle cx="62" cy="35" r="4" fill="none" stroke="black" stroke-width="1.8"/>
+  
+  <!-- Left eye (happy curved) -->
+  <path d="M 30 40 Q 30 45 36 45 Q 36 40 30 40" fill="black" stroke="black" stroke-width="1"/>
+  <path d="M 32 42 Q 34 44 36 42" stroke="white" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+  
+  <!-- Right eye (happy curved) -->
+  <path d="M 44 40 Q 44 45 50 45 Q 50 40 44 40" fill="black" stroke="black" stroke-width="1"/>
+  <path d="M 46 42 Q 48 44 50 42" stroke="white" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+  
+  <!-- Big smile -->
+  <path d="M 28 50 Q 40 58 52 50" stroke="black" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Laugh lines -->
+  <path d="M 26 54 Q 24 56 22 54" stroke="black" stroke-width="1" fill="none" stroke-linecap="round"/>
+  <path d="M 54 54 Q 56 56 58 54" stroke="black" stroke-width="1" fill="none" stroke-linecap="round"/>
+  
+  <!-- Small chat bubble dots -->
+  <circle cx="50" cy="70" r="1.5" fill="black" opacity="0.6"/>
+  <circle cx="56" cy="70" r="1.5" fill="black" opacity="0.6"/>
+  <circle cx="62" cy="70" r="1.5" fill="black" opacity="0.6"/>
+</svg>

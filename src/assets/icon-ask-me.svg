@@ -1,0 +1,7 @@
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <!-- Chat bubble icon -->
+  <path d="M2 6 C2 4.9 2.9 4 4 4 L20 4 C21.1 4 22 4.9 22 6 L22 14 C22 15.1 21.1 16 20 16 L6 16 L2 20 L4 16 L4 16 C2.9 16 2 15.1 2 14 Z" fill="none" stroke="black" stroke-width="1.5" stroke-linejoin="round"/>
+  <circle cx="6" cy="10" r="0.8" fill="black"/>
+  <circle cx="12" cy="10" r="0.8" fill="black"/>
+  <circle cx="18" cy="10" r="0.8" fill="black"/>
+</svg>

@@ -8,6 +8,7 @@ import { useConfirm } from './hooks/useConfirm';
 import { useToast, ToastContainer } from './components/Toast';
 import { playMeasureSound, playSuccessSound, playErrorSound, isMuted, setMuted, playClickSound } from './utils/soundUtils';
 import ConfirmModal from './components/ConfirmModal';
+import HelpPanel from './components/HelpPanel';
 import QuantumGuide from './components/QuantumGuide/QuantumGuide';
 import LandingPage from './pages/LandingPage';
 import CMSPage from './pages/CMSPage';
@@ -639,14 +640,15 @@ const AppContent = () => {
       <ConfirmModal dialogState={dialogState} onConfirm={handleConfirm} onCancel={handleCancel} />
       <ToastContainer toasts={toasts} onRemove={removeToast} />
       {(location.pathname === '/simulator' || location.pathname === '/game') && (
-        <QuantumGuide
+        <HelpPanel 
           onTryInSimulator={handleTryInSimulator}
+          currentPage={location.pathname === '/game' ? 'game' : 'simulator'}
+          quantumState={history[history.length - 1]?.state || '|00⟩'}
+          circuitGates={location.pathname === '/game' ? gameCircuit.map(g => g.gate) : circuit.map(g => g.gate)}
+          measurementResult={measurementOutcome}
           lastAction={lastAction}
-          circuit={location.pathname === '/game' ? gameCircuit : circuit}
-          measurementOutcome={measurementOutcome}
-          gameStatus={location.pathname === '/game' ? gameStatus : null}
-          gameLevel={location.pathname === '/game' ? gameLevel : 0}
-          pageContext={location.pathname === '/game' ? 'GAME' : 'SIMULATOR'}
+          gameLevel={gameLevel}
+          gameStatus={gameStatus}
         />
       )}
     </div>
