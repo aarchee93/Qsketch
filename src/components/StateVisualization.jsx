@@ -61,7 +61,7 @@ const StateVisualization = ({ stateVector, targetVector, measurementOutcome = nu
   return (
     <div>
       <div
-        className="flex justify-around items-end h-64 p-4 border-2 border-black bg-white rounded-lg shadow-lg mb-8"
+        className="flex justify-around items-end h-64 p-4 border-2 border-black bg-white rounded-lg shadow-lg mb-12"
         role="img"
         aria-label={`Probability distribution. ${liveSummary}`}
       >
@@ -118,7 +118,7 @@ const StateVisualization = ({ stateVector, targetVector, measurementOutcome = nu
               </div>
 
               {/* Label */}
-              <div className="text-sm font-bold mt-2 absolute bottom-[-30px]">
+              <div className="text-sm font-bold mt-2 absolute bottom-[-42px]">
                 {basisStates[index]}
               </div>
             </div>

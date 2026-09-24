@@ -23,13 +23,13 @@ const GatesPanel = ({
   const showTooltips = mode === 'guided'; // Tooltips only in guided mode
   
   return (
-  <div className="relative flex flex-col space-y-4 p-4 border-2 border-black bg-white rounded-lg shadow-xl overflow-visible" role="group" aria-label={title}>
+  <div className="relative flex flex-col space-y-4 p-5 border-2 border-black bg-white rounded-lg shadow-xl overflow-visible" role="group" aria-label={title}>
     <CornerDoodle position="top-right" variant="star" />
-    <h3 className="text-xl font-extrabold text-center border-b-2 border-dashed border-black pb-2">{title}</h3>
-    <div className="grid grid-cols-2 gap-4 overflow-visible">
+    <h3 className="text-xl font-extrabold text-center border-b-2 border-dashed border-black pb-3">{title}</h3>
+    <div className="grid grid-cols-2 gap-3 overflow-visible">
       {isAllowed('H0') && (
       <div 
-        className="relative"
+        className="relative w-full"
         onMouseEnter={() => setHoveredGate('H0')}
         onMouseLeave={() => setHoveredGate(null)}
         onTouchStart={(e) => {
@@ -41,6 +41,7 @@ const GatesPanel = ({
           aria-label="Apply Hadamard gate to Q0, creates superposition"
           onClick={() => applyNewGate('H0', H0)}
           disabled={disabled}
+          className="w-full min-h-[70px] flex flex-col items-center justify-center"
         >
           Hadamard (Q0)
           <span className="block text-xs font-normal">Superposition</span>
@@ -50,7 +51,7 @@ const GatesPanel = ({
       )}
       {isAllowed('H1') && (
       <div 
-        className="relative"
+        className="relative w-full"
         onMouseEnter={() => setHoveredGate('H1')}
         onMouseLeave={() => setHoveredGate(null)}
         onTouchStart={(e) => {
@@ -62,6 +63,7 @@ const GatesPanel = ({
           aria-label="Apply Hadamard gate to Q1, creates superposition"
           onClick={() => applyNewGate('H1', H1)}
           disabled={disabled}
+          className="w-full min-h-[70px] flex flex-col items-center justify-center"
         >
           Hadamard (Q1)
           <span className="block text-xs font-normal">Superposition</span>
@@ -71,7 +73,7 @@ const GatesPanel = ({
       )}
       {isAllowed('X0') && (
       <div 
-        className="relative"
+        className="relative w-full"
         onMouseEnter={() => setHoveredGate('X0')}
         onMouseLeave={() => setHoveredGate(null)}
         onTouchStart={(e) => {
@@ -83,6 +85,7 @@ const GatesPanel = ({
           aria-label="Apply Pauli-X gate to Q0, flips the qubit"
           onClick={() => applyNewGate('X0', X0)}
           disabled={disabled}
+          className="w-full min-h-[70px] flex flex-col items-center justify-center"
         >
           Pauli-X (Q0)
           <span className="block text-xs font-normal">Flips Qubit</span>
@@ -92,7 +95,7 @@ const GatesPanel = ({
       )}
       {isAllowed('X1') && (
       <div 
-        className="relative"
+        className="relative w-full"
         onMouseEnter={() => setHoveredGate('X1')}
         onMouseLeave={() => setHoveredGate(null)}
         onTouchStart={(e) => {
@@ -104,6 +107,7 @@ const GatesPanel = ({
           aria-label="Apply Pauli-X gate to Q1, flips the qubit"
           onClick={() => applyNewGate('X1', X1)}
           disabled={disabled}
+          className="w-full min-h-[70px] flex flex-col items-center justify-center"
         >
           Pauli-X (Q1)
           <span className="block text-xs font-normal">Flips Qubit</span>
@@ -113,7 +117,7 @@ const GatesPanel = ({
       )}
       {isAllowed('CNOT') && (
       <div 
-        className="relative col-span-2"
+        className="relative col-span-2 w-full"
         onMouseEnter={() => setHoveredGate('CNOT')}
         onMouseLeave={() => setHoveredGate(null)}
         onTouchStart={(e) => {
@@ -125,6 +129,7 @@ const GatesPanel = ({
           aria-label="Apply CNOT gate, control Q0 target Q1, creates entanglement"
           onClick={() => applyNewGate('CNOT', CNOT)}
           disabled={disabled}
+          className="w-full min-h-[70px] flex flex-col items-center justify-center"
         >
           CNOT (Q0 → Q1)
           <span className="block text-xs font-normal">Entanglement</span>
