@@ -1,7 +1,6 @@
 # Q-Sketch (Qubit Sketchpad)
 
 Q-Sketch is a browser-based quantum computing simulator and puzzle game, built as a 7th-semester minor project. It lets you apply gates to a 2-qubit system and watch the probability distribution change live, instead of just reading about superposition, entanglement, and measurement in a textbook. There's also a small notes editor for writing down your own understanding of each concept, and a Learning Centre with structured lessons, a glossary, and curated external resources.
-
 Accounts are optional. You can use Q-Sketch as a guest with progress and notes stored locally via `localStorage`, or sign up with email/password to sync your game progress, achievements, and concept notes to the cloud via Supabase — so your work follows you across devices and survives a cleared browser cache.
 
 ## Features
