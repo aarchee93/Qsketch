@@ -55,6 +55,7 @@ npm install
    ```env
    VITE_SUPABASE_URL=your_project_url
    VITE_SUPABASE_ANON_KEY=your_anon_key
+   VITE_GROQ_API_KEY=your_groq_api_key_here
    ```
 3. In the Supabase SQL editor, create the three required tables (`game_progress`, `user_achievements`, `user_concepts`), each with Row Level Security enabled and per-user policies. See `IMPLEMENTATION_GUIDE.md` for the exact SQL.
 4. Enable the **Email** provider under Authentication → Providers.
